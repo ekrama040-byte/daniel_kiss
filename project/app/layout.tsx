@@ -1,6 +1,6 @@
 import './globals.css';
 import type { Metadata } from 'next';
-import { JetBrains_Mono, Inter } from 'next/font/google';
+import { JetBrains_Mono, Anton, Permanent_Marker } from 'next/font/google';
 
 const jetbrains = JetBrains_Mono({
   subsets: ['latin'],
@@ -8,9 +8,17 @@ const jetbrains = JetBrains_Mono({
   display: 'swap',
 });
 
-const inter = Inter({
+const anton = Anton({
+  weight: '400',
   subsets: ['latin'],
-  variable: '--font-sans',
+  variable: '--font-display',
+  display: 'swap',
+});
+
+const marker = Permanent_Marker({
+  weight: '400',
+  subsets: ['latin'],
+  variable: '--font-marker',
   display: 'swap',
 });
 
@@ -33,11 +41,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${jetbrains.variable} ${inter.variable}`}>
-      <body
-        className="font-mono-display bg-background text-foreground antialiased"
-        style={{ fontFamily: 'var(--font-mono), monospace' }}
-      >
+    <html
+      lang="en"
+      className={`${jetbrains.variable} ${anton.variable} ${marker.variable} dark`}
+    >
+      <body className="bg-[#0D0D0D] text-[#EAEAEA] font-mono antialiased overflow-x-hidden selection:bg-[#E63222] selection:text-white">
         {children}
       </body>
     </html>
