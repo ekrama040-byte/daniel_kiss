@@ -30,8 +30,8 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
-    overflow-x: hidden;
+   @apply bg-background text-foreground;
+    overflow-x: clip;
   }
   html {
     scrollbar-width: none;
@@ -114,6 +114,33 @@
 /* Nav bar */
 .nav-bar {
   will-change: opacity;
+}
+/* Periodic navbar slice-glitch blink */
+@keyframes nav-glitch-slice {
+  0% {
+    transform: translate(0, 0) skewX(0deg);
+    text-shadow: none;
+  }
+  25% {
+    transform: translate(-3px, 1px) skewX(-12deg);
+    text-shadow: 2px 0 #ff2e17, -2px 0 #00f0ff;
+  }
+  50% {
+    transform: translate(3px, -1px) skewX(10deg);
+    text-shadow: -2px 0 #ff2e17, 2px 0 #00f0ff;
+  }
+  75% {
+    transform: translate(-2px, 0) skewX(-6deg);
+    text-shadow: 1px 0 #ff2e17;
+  }
+  100% {
+    transform: translate(0, 0) skewX(0deg);
+    text-shadow: none;
+  }
+}
+
+.glitch-active {
+  animation: nav-glitch-slice 0.18s steps(2, end) infinite;
 }
 
 /* Reduced motion */
