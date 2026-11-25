@@ -45,7 +45,7 @@ export default function RootLayout({
       lang="en"
       className={`${jetbrains.variable} ${anton.variable} ${marker.variable} dark`}
     >
-      <body className="bg-[#0D0D0D] text-[#EAEAEA] font-mono antialiased overflow-x-hidden selection:bg-[#E63222] selection:text-white">
+      <body className="bg-[#0D0D0D] text-[#EAEAEA] font-mono antialiased overflow-x-clip selection:bg-[#E63222] selection:text-white">
         {children}
       </body>
     </html>
