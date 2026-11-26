@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useRef, type MutableRefObject, type ReactNode } from 'react';
 
 interface ThemeCard {
   id: string;
@@ -314,8 +314,14 @@ function GlitchCardFrame({ children }: { children: ReactNode }) {
   );
 }
 
-export default function WorksCarousel() {
-  const zoneRef = useRef<HTMLDivElement>(null);
+export default function WorksCarousel({
+  enterPRef,
+  pinPRef,
+}: {
+  enterPRef: MutableRefObject<number>;
+  pinPRef: MutableRefObject<number>;
+}) {
+  const layerRef = useRef<HTMLDivElement>(null);
   const headWrapRef = useRef<HTMLDivElement>(null);
   const madeCharRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const brokeBrushRef = useRef<SVGSVGElement>(null);
@@ -333,8 +339,6 @@ export default function WorksCarousel() {
   const designedNoteRef = useRef<HTMLParagraphElement>(null);
 
   useEffect(() => {
-    let smoothEnter = 0;
-    let smoothPin = 0;
     let carouselOffset = 0;
     let scrollBoost = 0;
     let lastScrollY = window.scrollY;
@@ -354,129 +358,134 @@ export default function WorksCarousel() {
       const dt = Math.min((now - lastTime) / 1000, 0.05);
       lastTime = now;
 
-      const vh = window.innerHeight || 1;
-      const zone = zoneRef.current;
+      const enterP = enterPRef.current;
+      const pinP = pinPRef.current;
 
-      if (zone) {
-        const rect = zone.getBoundingClientRect();
-        const rawEnter = clamp((vh * 0.9 - rect.top) / (vh * 0.9), 0, 1);
-        const span = Math.max(zone.offsetHeight - vh, 1);
-        const rawPin = clamp(-rect.top / span, 0, 1);
+      // Asymmetric in-place exit windows (overlaps Layer 2's entry at pinP 0.28 -> 0.35)
+      const calloutExit = easeOutCubic(seg(pinP, 0.14, 0.2));
+      const headExit = easeOutCubic(seg(pinP, 0.16, 0.28));
+      const carouselExit = easeOutCubic(seg(pinP, 0.18, 0.3));
+      const bottomExit = easeOutCubic(seg(pinP, 0.22, 0.35));
 
-        smoothEnter += (rawEnter - smoothEnter) * 0.16;
-        smoothPin += (rawPin - smoothPin) * 0.14;
+      const isVisible = bottomExit < 0.995;
+
+      if (layerRef.current) {
+        layerRef.current.style.visibility = isVisible ? 'visible' : 'hidden';
+        layerRef.current.style.pointerEvents = carouselExit < 0.2 ? 'auto' : 'none';
       }
 
-      // Subtle tilt-fade out at the very end of the pin before WorksWpkoi rises
-      const exitT = easeOutCubic(seg(smoothPin, 0.72, 1.0));
-
-      if (headWrapRef.current) {
-        headWrapRef.current.style.opacity = String(1 - exitT * 0.85);
-        headWrapRef.current.style.transform = `translate3d(0, ${-exitT * 32}px, 0) rotate(${
-          -exitT * 3.5
-        }deg)`;
-      }
-
-      // 1. Assemble MADE SOME. BROKE SOME... letter-by-letter while entering
-      const totalMade = madeCharRefs.current.length;
-      madeCharRefs.current.forEach((el, idx) => {
-        if (!el) return;
-        const start = 0.04 + (idx / Math.max(totalMade, 1)) * 0.52;
-        const t = easeOutCubic(seg(smoothEnter, start, start + 0.28));
-        const tilt = CHAR_TILTS[idx % CHAR_TILTS.length] * (1 - t);
-        const dy = (idx % 2 === 0 ? -1 : 1) * (14 + (idx % 4) * 4) * (1 - t);
-        el.style.opacity = String(t);
-        el.style.transform = `translate3d(0, ${dy}px, 0) rotate(${tilt}deg) scale(${
-          1 + 0.12 * (1 - t)
-        })`;
-      });
-
-      if (brokeBrushRef.current) {
-        const bt = easeOutCubic(seg(smoothEnter, 0.52, 0.92));
-        brokeBrushRef.current.style.opacity = String(bt);
-        brokeBrushRef.current.style.clipPath = `inset(0 ${(1 - bt) * 100}% 0 0)`;
-      }
-
-      // 2. Reveal & drive continuous inward-curved 3D carousel
-      if (carouselWrapRef.current) {
-        const cIn = easeOutCubic(seg(smoothEnter, 0.45, 0.95));
-        carouselWrapRef.current.style.opacity = String(cIn * (1 - exitT * 0.75));
-        carouselWrapRef.current.style.transform = `translate3d(0, ${(1 - cIn) * 24}px, 0) scale(${
-          1 - exitT * 0.06
-        })`;
-      }
-
-      const vp = carouselViewportRef.current;
-      const track = carouselTrackRef.current;
-      if (vp && track) {
-        const halfTrack = track.scrollWidth / 2;
-        if (halfTrack > 0) {
-          const baseSpeed = isHoveredRef.current ? 16 : 64;
-          scrollBoost *= 0.92;
-          carouselOffset += (baseSpeed + scrollBoost) * dt;
-          if (carouselOffset >= halfTrack) carouselOffset -= halfTrack;
-          if (carouselOffset < 0) carouselOffset += halfTrack;
-
-          track.style.transform = `translate3d(${-carouselOffset}px, 0, 0)`;
-
-          const vpRect = vp.getBoundingClientRect();
-          const vpCenter = vpRect.left + vpRect.width * 0.5;
-          const halfW = Math.max(vpRect.width * 0.5, 1);
-
-          carouselCardRefs.current.forEach((cardEl) => {
-            if (!cardEl) return;
-            const rect = cardEl.getBoundingClientRect();
-            if (rect.right < vpRect.left - 160 || rect.left > vpRect.right + 160) return;
-
-            const cardCenter = rect.left + rect.width * 0.5;
-            const norm = clamp((cardCenter - vpCenter) / halfW, -1.35, 1.35);
-
-            // Inward concave cylindrical curve
-            const rotateY = -norm * 35;
-            const translateZ = norm * norm * 86 - 42;
-            const scale = 0.92 + Math.abs(norm) * 0.08;
-            const opacity = clamp(1.18 - Math.abs(norm) * 0.44, 0.2, 1);
-
-            cardEl.style.transform = `perspective(680px) translateZ(${translateZ}px) rotateY(${rotateY}deg) scale(${scale})`;
-            cardEl.style.opacity = String(opacity);
-          });
+      if (isVisible) {
+        // 1. Top headline: scattered assembly on approach -> counter-clockwise fade-up on exit
+        if (headWrapRef.current) {
+          headWrapRef.current.style.opacity = String(1 - headExit);
+          headWrapRef.current.style.transform = `translate3d(0, ${-headExit * 34}px, 0) rotate(${
+            -headExit * 4.5
+          }deg)`;
         }
-      }
 
-      // 3. Bottom row: WPKOI ↗ + AND SOMEHOW, 1M+ DOWNLOADS
-      if (bottomWrapRef.current) {
-        bottomWrapRef.current.style.opacity = String(1 - exitT * 0.85);
-        bottomWrapRef.current.style.transform = `translate3d(0, ${exitT * 30}px, 0) rotate(${
-          exitT * 2.8
-        }deg)`;
-      }
+        const totalMade = madeCharRefs.current.length;
+        madeCharRefs.current.forEach((el, idx) => {
+          if (!el) return;
+          const start = 0.04 + (idx / Math.max(totalMade, 1)) * 0.5;
+          const t = easeOutCubic(seg(enterP, start, start + 0.28));
+          const tilt = CHAR_TILTS[idx % CHAR_TILTS.length] * (1 - t);
+          const dy = (idx % 2 === 0 ? -1 : 1) * (14 + (idx % 4) * 4) * (1 - t);
+          el.style.opacity = String(t);
+          el.style.transform = `translate3d(0, ${dy}px, 0) rotate(${tilt}deg) scale(${
+            1 + 0.12 * (1 - t)
+          })`;
+        });
 
-      const dlProgress = clamp(smoothEnter * 0.78 + smoothPin * 1.6, 0, 1);
-      const totalDl = downloadsCharRefs.current.length;
-      downloadsCharRefs.current.forEach((el, idx) => {
-        if (!el) return;
-        const start = 0.28 + (idx / Math.max(totalDl, 1)) * 0.36;
-        const t = easeOutCubic(seg(dlProgress, start, start + 0.24));
-        const tilt = CHAR_TILTS[(idx + 3) % CHAR_TILTS.length] * (1 - t);
-        const dy = (idx % 2 === 0 ? 1 : -1) * 14 * (1 - t);
-        el.style.opacity = String(t);
-        el.style.transform = `translate3d(0, ${dy}px, 0) rotate(${tilt}deg)`;
-      });
+        if (brokeBrushRef.current) {
+          const bt = easeOutCubic(seg(enterP, 0.5, 0.88));
+          brokeBrushRef.current.style.opacity = String(bt);
+          brokeBrushRef.current.style.clipPath = `inset(0 ${(1 - bt) * 100}% 0 0)`;
+        }
 
-      if (downloadsBrushRef.current) {
-        const dbt = easeOutCubic(seg(dlProgress, 0.64, 0.88));
-        downloadsBrushRef.current.style.opacity = String(dbt);
-        downloadsBrushRef.current.style.clipPath = `inset(0 ${(1 - dbt) * 100}% 0 0)`;
-      }
+        // 2. Continuous inward-curved 3D carousel (recedes smoothly without scrolling off)
+        if (carouselWrapRef.current) {
+          const cIn = easeOutCubic(seg(enterP, 0.42, 0.92));
+          carouselWrapRef.current.style.opacity = String(cIn * (1 - carouselExit));
+          carouselWrapRef.current.style.transform = `translate3d(0, ${(1 - cIn) * 24}px, 0) scale(${
+            1 - carouselExit * 0.06
+          })`;
+        }
 
-      if (designedNoteRef.current) {
-        designedNoteRef.current.style.opacity = String(easeOutCubic(seg(dlProgress, 0.72, 0.94)));
-      }
+        const vp = carouselViewportRef.current;
+        const track = carouselTrackRef.current;
+        if (vp && track) {
+          const halfTrack = track.scrollWidth / 2;
+          if (halfTrack > 0) {
+            const baseSpeed = isHoveredRef.current ? 16 : 64;
+            scrollBoost *= 0.92;
+            carouselOffset += (baseSpeed + scrollBoost) * dt;
+            if (carouselOffset >= halfTrack) carouselOffset -= halfTrack;
+            if (carouselOffset < 0) carouselOffset += halfTrack;
 
-      if (wpkoiCalloutRef.current) {
-        const wt = easeOutCubic(seg(dlProgress, 0.62, 0.88));
-        wpkoiCalloutRef.current.style.opacity = String(wt);
-        wpkoiCalloutRef.current.style.transform = `translate3d(${(1 - wt) * -16}px, 0, 0) rotate(-6deg)`;
+            track.style.transform = `translate3d(${-carouselOffset}px, 0, 0)`;
+
+            const vpRect = vp.getBoundingClientRect();
+            const vpCenter = vpRect.left + vpRect.width * 0.5;
+            const halfW = Math.max(vpRect.width * 0.5, 1);
+
+            carouselCardRefs.current.forEach((cardEl) => {
+              if (!cardEl) return;
+              const rect = cardEl.getBoundingClientRect();
+              if (rect.right < vpRect.left - 160 || rect.left > vpRect.right + 160) return;
+
+              const cardCenter = rect.left + rect.width * 0.5;
+              const norm = clamp((cardCenter - vpCenter) / halfW, -1.35, 1.35);
+
+              // Deep inward concave cylindrical curve
+              const rotateY = -norm * 35;
+              const translateZ = norm * norm * 86 - 42;
+              const scale = 0.92 + Math.abs(norm) * 0.08;
+              const opacity = clamp(1.18 - Math.abs(norm) * 0.44, 0.2, 1);
+
+              cardEl.style.transform = `perspective(680px) translateZ(${translateZ}px) rotateY(${rotateY}deg) scale(${scale})`;
+              cardEl.style.opacity = String(opacity);
+            });
+          }
+        }
+
+        // 3. Bottom row: WPKOI ↗ vanishes first; 1M+ DOWNLOADS lags and tilts clockwise on exit
+        if (bottomWrapRef.current) {
+          bottomWrapRef.current.style.opacity = String(1 - bottomExit);
+          bottomWrapRef.current.style.transform = `translate3d(0, ${bottomExit * 32}px, 0) rotate(${
+            bottomExit * 4.0
+          }deg)`;
+        }
+
+        const dlProgress = clamp(enterP * 0.85 + pinP * 2.5, 0, 1);
+        const totalDl = downloadsCharRefs.current.length;
+        downloadsCharRefs.current.forEach((el, idx) => {
+          if (!el) return;
+          const start = 0.25 + (idx / Math.max(totalDl, 1)) * 0.36;
+          const t = easeOutCubic(seg(dlProgress, start, start + 0.24));
+          const tilt = CHAR_TILTS[(idx + 3) % CHAR_TILTS.length] * (1 - t);
+          const dy = (idx % 2 === 0 ? 1 : -1) * 14 * (1 - t);
+          el.style.opacity = String(t);
+          el.style.transform = `translate3d(0, ${dy}px, 0) rotate(${tilt}deg)`;
+        });
+
+        if (downloadsBrushRef.current) {
+          const dbt = easeOutCubic(seg(dlProgress, 0.6, 0.86));
+          downloadsBrushRef.current.style.opacity = String(dbt);
+          downloadsBrushRef.current.style.clipPath = `inset(0 ${(1 - dbt) * 100}% 0 0)`;
+        }
+
+        if (designedNoteRef.current) {
+          designedNoteRef.current.style.opacity = String(easeOutCubic(seg(dlProgress, 0.68, 0.9)));
+        }
+
+        if (wpkoiCalloutRef.current) {
+          const wIn = easeOutCubic(seg(dlProgress, 0.6, 0.86));
+          const wAlpha = wIn * (1 - calloutExit);
+          wpkoiCalloutRef.current.style.opacity = String(wAlpha);
+          wpkoiCalloutRef.current.style.transform = `translate3d(${(1 - wIn) * -16}px, ${
+            calloutExit * 12
+          }px, 0) rotate(-6deg)`;
+        }
       }
 
       rafId = requestAnimationFrame(tick);
@@ -487,27 +496,57 @@ export default function WorksCarousel() {
       cancelAnimationFrame(rafId);
       window.removeEventListener('scroll', onScroll);
     };
-  }, []);
+  }, [enterPRef, pinPRef]);
 
   const madeChars = 'MADE SOME.'.split('');
   const brokeChars = 'BROKE SOME...'.split('');
   const somehowChars = 'AND SOMEHOW,'.split('');
   const downloadsChars = '1M+ DOWNLOADS'.split('');
 
+  madeCharRefs.current = [];
+  downloadsCharRefs.current = [];
   let madeIdx = 0;
   let dlIdx = 0;
 
   return (
-    <div ref={zoneRef} className="relative h-[185vh] w-full select-none">
-      <div className="sticky top-0 h-screen w-full flex flex-col justify-between py-12 sm:py-16 overflow-hidden">
-        {/* === TOP HEADLINE: MADE SOME. BROKE SOME... === */}
-        <div ref={headWrapRef} className="px-8 sm:px-14 pt-2 will-change-transform">
-          <h2 className="boil-subtle font-display uppercase text-[10.5vw] sm:text-[7.2vw] lg:text-[5.4vw] xl:text-[5.1vw] leading-[0.88] tracking-[-0.02em] flex flex-wrap items-baseline gap-x-4 sm:gap-x-6">
-            <span className="inline-flex">
-              {madeChars.map((ch, i) => {
+    <div
+      ref={layerRef}
+      className="absolute inset-0 z-10 flex flex-col justify-between py-12 sm:py-16 select-none"
+    >
+      {/* === TOP HEADLINE: MADE SOME. BROKE SOME... === */}
+      <div ref={headWrapRef} className="px-8 sm:px-14 pt-2 will-change-transform">
+        <h2 className="boil-subtle font-display uppercase text-[10.5vw] sm:text-[7.2vw] lg:text-[5.4vw] xl:text-[5.1vw] leading-[0.88] tracking-[-0.02em] flex flex-wrap items-baseline gap-x-4 sm:gap-x-6">
+          <span className="inline-flex">
+            {madeChars.map((ch, i) => {
+              if (ch === ' ') {
+                return (
+                  <span key={`m-${i}`} className="inline-block w-[0.24em]">
+                    &nbsp;
+                  </span>
+                );
+              }
+              const refIdx = madeIdx++;
+              return (
+                <span
+                  key={`m-${i}`}
+                  ref={(el) => {
+                    madeCharRefs.current[refIdx] = el;
+                  }}
+                  style={{ opacity: 0 }}
+                  className="inline-block text-[#EAE6DF] drop-shadow-[0_0_20px_rgba(234,230,223,0.18)] will-change-transform"
+                >
+                  {ch}
+                </span>
+              );
+            })}
+          </span>
+
+          <span className="inline-flex flex-col">
+            <span className="kinetic-blink inline-flex">
+              {brokeChars.map((ch, i) => {
                 if (ch === ' ') {
                   return (
-                    <span key={`m-${i}`} className="inline-block w-[0.24em]">
+                    <span key={`b-${i}`} className="inline-block w-[0.24em]">
                       &nbsp;
                     </span>
                   );
@@ -515,12 +554,135 @@ export default function WorksCarousel() {
                 const refIdx = madeIdx++;
                 return (
                   <span
-                    key={`m-${i}`}
+                    key={`b-${i}`}
                     ref={(el) => {
                       madeCharRefs.current[refIdx] = el;
                     }}
                     style={{ opacity: 0 }}
-                    className="inline-block text-[#EAE6DF] drop-shadow-[0_0_20px_rgba(234,230,223,0.18)] will-change-transform"
+                    className="inline-block text-[#FF2E17] drop-shadow-[0_0_24px_rgba(255,46,23,0.38)] will-change-transform"
+                  >
+                    {ch}
+                  </span>
+                );
+              })}
+            </span>
+
+            <svg
+              ref={brokeBrushRef}
+              style={{ opacity: 0 }}
+              viewBox="0 0 420 18"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="boil-fast w-full h-3 sm:h-3.5 mt-1 text-[#EAE6DF]/90"
+              preserveAspectRatio="none"
+            >
+              <path
+                d="M3 13C115 8 285 6 417 9C325 13 145 14 14 16"
+                stroke="currentColor"
+                strokeWidth="5.5"
+                strokeLinecap="round"
+              />
+            </svg>
+          </span>
+        </h2>
+      </div>
+
+      {/* === MIDDLE: INWARD CONCAVE 3D GLITCH CAROUSEL === */}
+      <div ref={carouselWrapRef} style={{ opacity: 0 }} className="w-full will-change-transform">
+        <div
+          ref={carouselViewportRef}
+          onMouseEnter={() => {
+            isHoveredRef.current = true;
+          }}
+          onMouseLeave={() => {
+            isHoveredRef.current = false;
+          }}
+          className="relative w-full py-6 overflow-hidden"
+          style={{
+            WebkitMaskImage:
+              'linear-gradient(to right, transparent 0%, black 7%, black 93%, transparent 100%)',
+            maskImage:
+              'linear-gradient(to right, transparent 0%, black 7%, black 93%, transparent 100%)',
+          }}
+        >
+          <div
+            ref={carouselTrackRef}
+            className="flex items-center gap-6 sm:gap-7 w-max will-change-transform"
+          >
+            {loopedCards.map((card, idx) => (
+              <a
+                key={`${card.id}-${idx}`}
+                ref={(el) => {
+                  carouselCardRefs.current[idx] = el;
+                }}
+                href={card.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group relative block shrink-0 w-[225px] sm:w-[245px] xl:w-[265px] aspect-[4/3.1] bg-[#161616] border border-white/15 overflow-hidden shadow-[0_20px_44px_rgba(0,0,0,0.72)] will-change-transform"
+              >
+                <div className="absolute top-2 left-2.5 z-30 inline-flex items-center gap-1.5 bg-[#EAE6DF]/92 px-2.5 py-0.5 text-[10px] font-mono tracking-[0.14em] uppercase text-[#141414]">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#FF2E17] shrink-0" />
+                  <span className="font-semibold">
+                    {card.name} / {card.id}
+                  </span>
+                </div>
+
+                <GlitchCardFrame>
+                  <ThemeCardArtwork variant={card.variant} />
+                </GlitchCardFrame>
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* === BOTTOM: HANDWRITTEN WPKOI ↗ + AND SOMEHOW, 1M+ DOWNLOADS === */}
+      <div
+        ref={bottomWrapRef}
+        className="px-8 sm:px-14 pb-2 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 will-change-transform"
+      >
+        <div
+          ref={wpkoiCalloutRef}
+          style={{ opacity: 0 }}
+          className="boil-fast font-marker text-2xl sm:text-3xl text-[#EAE6DF] inline-flex items-center gap-2 mb-2 will-change-transform"
+        >
+          <span>WPKOI</span>
+          <svg
+            viewBox="0 0 42 28"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-9 h-6 text-[#EAE6DF]"
+          >
+            <path
+              d="M3 23C14 19 25 13 37 5M22 4C28 4 33 4 38 4C36 10 34 15 32 20"
+              stroke="currentColor"
+              strokeWidth="3.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </div>
+
+        <div className="flex flex-col items-end text-right ml-auto">
+          <div className="boil-subtle font-display uppercase text-[8vw] sm:text-[5vw] lg:text-[3.5vw] leading-[0.9] tracking-[-0.015em] flex flex-wrap justify-end items-baseline gap-x-3 sm:gap-x-4">
+            <span className="inline-flex">
+              {somehowChars.map((ch, i) => {
+                if (ch === ' ') {
+                  return (
+                    <span key={`s-${i}`} className="inline-block w-[0.24em]">
+                      &nbsp;
+                    </span>
+                  );
+                }
+                const refIdx = dlIdx++;
+                return (
+                  <span
+                    key={`s-${i}`}
+                    ref={(el) => {
+                      downloadsCharRefs.current[refIdx] = el;
+                    }}
+                    style={{ opacity: 0 }}
+                    className="inline-block text-[#EAE6DF] will-change-transform"
                   >
                     {ch}
                   </span>
@@ -530,23 +692,23 @@ export default function WorksCarousel() {
 
             <span className="inline-flex flex-col">
               <span className="kinetic-blink inline-flex">
-                {brokeChars.map((ch, i) => {
+                {downloadsChars.map((ch, i) => {
                   if (ch === ' ') {
                     return (
-                      <span key={`b-${i}`} className="inline-block w-[0.24em]">
+                      <span key={`d-${i}`} className="inline-block w-[0.24em]">
                         &nbsp;
                       </span>
                     );
                   }
-                  const refIdx = madeIdx++;
+                  const refIdx = dlIdx++;
                   return (
                     <span
-                      key={`b-${i}`}
+                      key={`d-${i}`}
                       ref={(el) => {
-                        madeCharRefs.current[refIdx] = el;
+                        downloadsCharRefs.current[refIdx] = el;
                       }}
                       style={{ opacity: 0 }}
-                      className="inline-block text-[#FF2E17] drop-shadow-[0_0_24px_rgba(255,46,23,0.38)] will-change-transform"
+                      className="inline-block text-[#FF2E17] drop-shadow-[0_0_20px_rgba(255,46,23,0.38)] will-change-transform"
                     >
                       {ch}
                     </span>
@@ -555,181 +717,31 @@ export default function WorksCarousel() {
               </span>
 
               <svg
-                ref={brokeBrushRef}
+                ref={downloadsBrushRef}
                 style={{ opacity: 0 }}
-                viewBox="0 0 420 18"
+                viewBox="0 0 340 16"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
-                className="boil-fast w-full h-3 sm:h-3.5 mt-1 text-[#EAE6DF]/90"
+                className="w-full h-2.5 sm:h-3 mt-1 text-[#EAE6DF]/90"
                 preserveAspectRatio="none"
               >
                 <path
-                  d="M3 13C115 8 285 6 417 9C325 13 145 14 14 16"
+                  d="M3 11C95 7 235 5 337 8C260 11 115 12 12 14"
                   stroke="currentColor"
-                  strokeWidth="5.5"
+                  strokeWidth="5"
                   strokeLinecap="round"
                 />
               </svg>
             </span>
-          </h2>
-        </div>
-
-        {/* === MIDDLE: INWARD CONCAVE 3D GLITCH CAROUSEL === */}
-        <div ref={carouselWrapRef} style={{ opacity: 0 }} className="w-full will-change-transform">
-          <div
-            ref={carouselViewportRef}
-            onMouseEnter={() => {
-              isHoveredRef.current = true;
-            }}
-            onMouseLeave={() => {
-              isHoveredRef.current = false;
-            }}
-            className="relative w-full py-6 overflow-hidden"
-            style={{
-              WebkitMaskImage:
-                'linear-gradient(to right, transparent 0%, black 7%, black 93%, transparent 100%)',
-              maskImage:
-                'linear-gradient(to right, transparent 0%, black 7%, black 93%, transparent 100%)',
-            }}
-          >
-            <div
-              ref={carouselTrackRef}
-              className="flex items-center gap-6 sm:gap-7 w-max will-change-transform"
-            >
-              {loopedCards.map((card, idx) => (
-                <a
-                  key={`${card.id}-${idx}`}
-                  ref={(el) => {
-                    carouselCardRefs.current[idx] = el;
-                  }}
-                  href={card.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group relative block shrink-0 w-[225px] sm:w-[245px] xl:w-[265px] aspect-[4/3.1] bg-[#161616] border border-white/15 overflow-hidden shadow-[0_20px_44px_rgba(0,0,0,0.72)] will-change-transform"
-                >
-                  <div className="absolute top-2 left-2.5 z-30 inline-flex items-center gap-1.5 bg-[#EAE6DF]/92 px-2.5 py-0.5 text-[10px] font-mono tracking-[0.14em] uppercase text-[#141414]">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#FF2E17] shrink-0" />
-                    <span className="font-semibold">
-                      {card.name} / {card.id}
-                    </span>
-                  </div>
-
-                  <GlitchCardFrame>
-                    <ThemeCardArtwork variant={card.variant} />
-                  </GlitchCardFrame>
-                </a>
-              ))}
-            </div>
           </div>
-        </div>
 
-        {/* === BOTTOM: HANDWRITTEN WPKOI ↗ + AND SOMEHOW, 1M+ DOWNLOADS === */}
-        <div
-          ref={bottomWrapRef}
-          className="px-8 sm:px-14 pb-2 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 will-change-transform"
-        >
-          <div
-            ref={wpkoiCalloutRef}
+          <p
+            ref={designedNoteRef}
             style={{ opacity: 0 }}
-            className="boil-fast font-marker text-2xl sm:text-3xl text-[#EAE6DF] inline-flex items-center gap-2 mb-2 will-change-transform"
+            className="mt-3.5 font-mono text-[10px] sm:text-xs tracking-[0.18em] uppercase text-[#9A9792]"
           >
-            <span>WPKOI</span>
-            <svg
-              viewBox="0 0 42 28"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="w-9 h-6 text-[#EAE6DF]"
-            >
-              <path
-                d="M3 23C14 19 25 13 37 5M22 4C28 4 33 4 38 4C36 10 34 15 32 20"
-                stroke="currentColor"
-                strokeWidth="3.2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </div>
-
-          <div className="flex flex-col items-end text-right ml-auto">
-            <div className="boil-subtle font-display uppercase text-[8vw] sm:text-[5vw] lg:text-[3.5vw] leading-[0.9] tracking-[-0.015em] flex flex-wrap justify-end items-baseline gap-x-3 sm:gap-x-4">
-              <span className="inline-flex">
-                {somehowChars.map((ch, i) => {
-                  if (ch === ' ') {
-                    return (
-                      <span key={`s-${i}`} className="inline-block w-[0.24em]">
-                        &nbsp;
-                      </span>
-                    );
-                  }
-                  const refIdx = dlIdx++;
-                  return (
-                    <span
-                      key={`s-${i}`}
-                      ref={(el) => {
-                        downloadsCharRefs.current[refIdx] = el;
-                      }}
-                      style={{ opacity: 0 }}
-                      className="inline-block text-[#EAE6DF] will-change-transform"
-                    >
-                      {ch}
-                    </span>
-                  );
-                })}
-              </span>
-
-              <span className="inline-flex flex-col">
-                <span className="kinetic-blink inline-flex">
-                  {downloadsChars.map((ch, i) => {
-                    if (ch === ' ') {
-                      return (
-                        <span key={`d-${i}`} className="inline-block w-[0.24em]">
-                          &nbsp;
-                        </span>
-                      );
-                    }
-                    const refIdx = dlIdx++;
-                    return (
-                      <span
-                        key={`d-${i}`}
-                        ref={(el) => {
-                          downloadsCharRefs.current[refIdx] = el;
-                        }}
-                        style={{ opacity: 0 }}
-                        className="inline-block text-[#FF2E17] drop-shadow-[0_0_20px_rgba(255,46,23,0.38)] will-change-transform"
-                      >
-                        {ch}
-                      </span>
-                    );
-                  })}
-                </span>
-
-                <svg
-                  ref={downloadsBrushRef}
-                  style={{ opacity: 0 }}
-                  viewBox="0 0 340 16"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="w-full h-2.5 sm:h-3 mt-1 text-[#EAE6DF]/90"
-                  preserveAspectRatio="none"
-                >
-                  <path
-                    d="M3 11C95 7 235 5 337 8C260 11 115 12 12 14"
-                    stroke="currentColor"
-                    strokeWidth="5"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </span>
-            </div>
-
-            <p
-              ref={designedNoteRef}
-              style={{ opacity: 0 }}
-              className="mt-3.5 font-mono text-[10px] sm:text-xs tracking-[0.18em] uppercase text-[#9A9792]"
-            >
-              DESIGNED. CODED. SHIPPED. BY ME.
-            </p>
-          </div>
+            DESIGNED. CODED. SHIPPED. BY ME.
+          </p>
         </div>
       </div>
     </div>

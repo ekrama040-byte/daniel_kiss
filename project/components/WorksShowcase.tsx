@@ -1,13 +1,13 @@
 'use client';
 
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const wpkoiShowcaseSlides = [
-  { num: '01', variant: 'trending' as const },
-  { num: '02', variant: 'catalog' as const },
-  { num: '03', variant: 'toolkit' as const },
-  { num: '04', variant: 'color' as const },
-  { num: '05', variant: 'dark' as const },
+  { num: '01', videoSrc: '/showcase-01.mp4', variant: 'trending' as const },
+  { num: '02', videoSrc: '/showcase-02.mp4', variant: 'catalog' as const },
+  { num: '03', videoSrc: '/showcase-03.mp4', variant: 'toolkit' as const },
+  { num: '04', videoSrc: '/showcase-04.mp4', variant: 'color' as const },
+  { num: '05', videoSrc: '/showcase-05.mp4', variant: 'dark' as const },
 ];
 
 const experienceItems = [
@@ -20,21 +20,6 @@ const experienceItems = [
 const clamp = (v: number, min = 0, max = 1) => Math.max(min, Math.min(max, v));
 const seg = (p: number, start: number, end: number) => clamp((p - start) / (end - start));
 
-function GlitchCardFrame({ children }: { children: ReactNode }) {
-  return (
-    <div className="glitch-card-inner">
-      <div className="w-full h-full">{children}</div>
-      <div className="glitch-layer-cyan" aria-hidden="true">
-        {children}
-      </div>
-      <div className="glitch-layer-red" aria-hidden="true">
-        {children}
-      </div>
-      <div className="glitch-layer-yellow" aria-hidden="true" />
-    </div>
-  );
-}
-
 function WpkoiShowcaseArtwork({
   variant,
 }: {
@@ -45,7 +30,6 @@ function WpkoiShowcaseArtwork({
       return (
         <div className="relative w-full h-full bg-[#111111] text-[#EAE6DF] overflow-hidden flex flex-col justify-between">
           <div className="relative flex-1 p-5 flex flex-col justify-between bg-gradient-to-br from-[#1E1A18] via-[#141414] to-[#1B1715]">
-            {/* Faint background theme collage texture */}
             <div className="pointer-events-none absolute inset-0 opacity-20 grid grid-cols-3 gap-2 p-2">
               <div className="bg-[#C8281D]/40" />
               <div className="bg-[#EAE6DF]/20" />
@@ -87,12 +71,12 @@ function WpkoiShowcaseArtwork({
       return (
         <div className="relative w-full h-full bg-[#131313] text-[#EAE6DF] p-3 grid grid-cols-3 grid-rows-2 gap-2.5 overflow-hidden">
           {[
-            { name: 'ARTANDA', price: '59\$', bg: '#D8BE3A', fg: '#141414', sub: 'STUDIO GRID' },
-            { name: 'LALITA', price: '59\$', bg: '#D9D6CE', fg: '#141414', sub: '51 DESIGNS' },
-            { name: 'PRAKATA', price: '59\$', bg: '#C9C2B2', fg: '#A6241B', sub: 'MAKE NOISE' },
-            { name: 'ARVA', price: '49\$', bg: '#ECEAE4', fg: '#C8281D', sub: 'NEXUS' },
-            { name: 'ABHEDA', price: '49\$', bg: '#DFDDD6', fg: '#141414', sub: 'MOMENTUM' },
-            { name: 'EKANTIKA', price: '59\$', bg: '#1D1D1D', fg: '#EAE6DF', sub: 'NEW BRAND' },
+            { name: 'ARTANDA', price: '59$', bg: '#D8BE3A', fg: '#141414', sub: 'STUDIO GRID' },
+            { name: 'LALITA', price: '59$', bg: '#D9D6CE', fg: '#141414', sub: '51 DESIGNS' },
+            { name: 'PRAKATA', price: '59$', bg: '#C9C2B2', fg: '#A6241B', sub: 'MAKE NOISE' },
+            { name: 'ARVA', price: '49$', bg: '#ECEAE4', fg: '#C8281D', sub: 'NEXUS' },
+            { name: 'ABHEDA', price: '49$', bg: '#DFDDD6', fg: '#141414', sub: 'MOMENTUM' },
+            { name: 'EKANTIKA', price: '59$', bg: '#1D1D1D', fg: '#EAE6DF', sub: 'NEW BRAND' },
           ].map((tile) => (
             <div
               key={tile.name}
@@ -130,7 +114,7 @@ function WpkoiShowcaseArtwork({
           </div>
           <div className="mt-2.5 pt-2 border-t border-black/20 flex items-baseline justify-between">
             <div className="font-display uppercase text-xl sm:text-2xl leading-none">
-              181 THEMES &amp; PLUGINS FOR <span className="text-[#FF2E17]">149\$!</span>
+              181 THEMES &amp; PLUGINS FOR <span className="text-[#FF2E17]">149$!</span>
             </div>
             <span className="font-mono text-[7px] uppercase opacity-70">ONE TIME</span>
           </div>
@@ -195,6 +179,40 @@ function WpkoiShowcaseArtwork({
   }
 }
 
+// Plays a clean looping 1-2s video if present in /public, otherwise renders crisp artwork (no glitch/shake)
+function ShowcaseCardMedia({
+  videoSrc,
+  variant,
+}: {
+  videoSrc: string;
+  variant: (typeof wpkoiShowcaseSlides)[number]['variant'];
+}) {
+  const [videoReady, setVideoReady] = useState(false);
+  const [videoFailed, setVideoFailed] = useState(false);
+
+  return (
+    <div className="relative w-full h-full overflow-hidden transition-transform duration-500 ease-out group-hover:scale-[1.02]">
+      <WpkoiShowcaseArtwork variant={variant} />
+
+      {!videoFailed && (
+        <video
+          src={videoSrc}
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="metadata"
+          onCanPlay={() => setVideoReady(true)}
+          onError={() => setVideoFailed(true)}
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${
+            videoReady ? 'opacity-100' : 'opacity-0'
+          }`}
+        />
+      )}
+    </div>
+  );
+}
+
 export default function WorksShowcase({
   onProgressChange,
 }: {
@@ -203,7 +221,6 @@ export default function WorksShowcase({
   const zoneRef = useRef<HTMLDivElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
-  const slideRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   const counterRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
@@ -230,7 +247,7 @@ export default function WorksShowcase({
       const slideProgress = seg(smoothP, 0.04, 0.94);
 
       if (vp && track) {
-        const maxShift = Math.max(track.scrollWidth - vp.clientWidth + 60, 0);
+        const maxShift = Math.max(track.scrollWidth - vp.clientWidth + 40, 0);
         track.style.transform = `translate3d(${-slideProgress * maxShift}px, 0, 0)`;
       }
 
@@ -243,16 +260,6 @@ export default function WorksShowcase({
         counterRef.current.textContent = String(activeIdx + 1).padStart(2, '0');
       }
 
-      // Highlight the active slide while gently scaling & dimming neighboring slides
-      slideRefs.current.forEach((slideEl, idx) => {
-        if (!slideEl) return;
-        const dist = Math.abs(slideProgress * (wpkoiShowcaseSlides.length - 1) - idx);
-        const scale = clamp(1 - dist * 0.08, 0.88, 1);
-        const opacity = clamp(1 - dist * 0.38, 0.42, 1);
-        slideEl.style.transform = `scale(${scale})`;
-        slideEl.style.opacity = String(opacity);
-      });
-
       rafId = requestAnimationFrame(tick);
     };
 
@@ -262,14 +269,14 @@ export default function WorksShowcase({
 
   return (
     <div ref={zoneRef} className="relative h-[320vh] w-full select-none">
-      <div className="sticky top-0 h-screen w-full flex flex-col justify-between px-8 sm:px-14 py-10 sm:py-12 overflow-hidden">
+      <div className="sticky top-0 h-screen w-full flex flex-col justify-between px-7 sm:px-10 xl:px-14 py-9 sm:py-11 overflow-hidden">
         {/* === TOP ROW: WPKOI / 2018 -> NOW + IT TOOK MY TIME. + ENTER WPKOI ↗ === */}
-        <div className="flex flex-wrap items-start justify-between gap-4 pt-2">
+        <div className="flex flex-wrap items-start justify-between gap-4 pt-1">
           <div>
             <div className="inline-flex flex-col">
               <div className="flex items-baseline gap-2 font-mono text-xs tracking-[0.16em] uppercase text-[#9A9792]">
                 <span>WPKOI / 2018 →</span>
-                <span className="boil-fast font-marker text-xl sm:text-2xl text-[#FF2E17] leading-none">
+                <span className="font-marker text-xl sm:text-2xl text-[#FF2E17] leading-none">
                   NOW
                 </span>
               </div>
@@ -289,24 +296,23 @@ export default function WorksShowcase({
               </svg>
             </div>
 
-            <h3 className="boil-subtle mt-1.5 font-display uppercase text-4xl sm:text-5xl lg:text-[58px] leading-[0.88] tracking-tight">
+            <h3 className="mt-1.5 font-display uppercase text-4xl sm:text-5xl lg:text-[56px] leading-[0.88] tracking-tight">
               <span className="text-[#EAE6DF]">IT TOOK </span>
-              <span className="kinetic-blink text-[#FF2E17]">MY TIME.</span>
+              <span className="text-[#FF2E17]">MY TIME.</span>
             </h3>
           </div>
 
-          {/* Hand-Circled Oval Link: ENTER WPKOI ↗ (turns crimson on hover) */}
           <a
             href="https://wpkoi.com/"
             target="_blank"
             rel="noopener noreferrer"
-            className="boil-fast group relative inline-flex items-center gap-2 px-7 py-2.5 font-marker text-lg sm:text-2xl text-[#EAE6DF] hover:text-[#FF2E17] transition-colors -rotate-2"
+            className="group relative inline-flex items-center gap-2 px-7 py-2.5 font-marker text-lg sm:text-2xl text-[#EAE6DF] hover:text-[#FF2E17] transition-colors -rotate-2"
           >
             <svg
               viewBox="0 0 240 64"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
-              className="pointer-events-none absolute inset-0 w-full h-full text-[#EAE6DF]/85 group-hover:text-[#EAE6DF] transition-colors"
+              className="pointer-events-none absolute inset-0 w-full h-full text-[#EAE6DF]/85"
               preserveAspectRatio="none"
             >
               <path
@@ -323,78 +329,65 @@ export default function WorksShowcase({
           </a>
         </div>
 
-        {/* === MIDDLE ROW: 01 / 05 + SCROLL -> + HORIZONTAL 5-CARD SHOWCASE === */}
-        <div className="my-auto grid grid-cols-1 md:grid-cols-[125px_1fr] items-center gap-6 py-4">
-          <div className="flex md:flex-col items-center md:items-start justify-between md:h-[265px]">
-            <div className="kinetic-blink font-display text-2xl sm:text-3xl tracking-wider tabular-nums">
+        {/* === MIDDLE ROW: 01 / 05 + SCROLL -> + CLEAN SIDE-BY-SIDE 5-CARD TRACK === */}
+        <div className="my-auto grid grid-cols-1 md:grid-cols-[105px_1fr] items-center gap-5 py-3">
+          <div className="flex md:flex-col items-center md:items-start justify-between md:h-[245px]">
+            <div className="font-display text-2xl sm:text-3xl tracking-wider tabular-nums">
               <span ref={counterRef} className="text-[#FF2E17]">
                 01
               </span>
               <span className="text-[#787570]"> / 05</span>
             </div>
 
-            <div className="boil-fast font-marker text-lg sm:text-xl text-[#EAE6DF] -rotate-3">
+            <div className="font-marker text-base sm:text-lg text-[#EAE6DF] -rotate-3">
               SCROLL →
             </div>
           </div>
 
-          <div
-            ref={viewportRef}
-            className="relative w-full overflow-hidden"
-            style={{
-              WebkitMaskImage:
-                'linear-gradient(to right, transparent 0%, black 4%, black 96%, transparent 100%)',
-              maskImage:
-                'linear-gradient(to right, transparent 0%, black 4%, black 96%, transparent 100%)',
-            }}
-          >
+          <div ref={viewportRef} className="relative w-full overflow-hidden">
             <div
               ref={trackRef}
-              className="flex items-center gap-7 pl-4 pr-20 w-max will-change-transform py-2"
+              className="flex items-center gap-6 pr-12 w-max will-change-transform py-2"
             >
-              {wpkoiShowcaseSlides.map((slide, idx) => (
+              {wpkoiShowcaseSlides.map((slide) => (
                 <a
                   key={slide.num}
-                  ref={(el) => {
-                    slideRefs.current[idx] = el;
-                  }}
                   href="https://wpkoi.com/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group relative block shrink-0 w-[300px] sm:w-[390px] lg:w-[425px] aspect-[16/11] bg-[#141414] border border-white/15 overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.75)] will-change-transform"
+                  className="group relative block shrink-0 w-[290px] sm:w-[350px] xl:w-[395px] aspect-[16/11] bg-[#141414] border border-white/15 overflow-hidden shadow-[0_18px_42px_rgba(0,0,0,0.7)]"
                 >
-                  {/* Top-Left Red-Dot Number Pill */}
-                  <div className="absolute top-3 left-3 z-30 inline-flex items-center gap-1.5 bg-[#EAE6DF]/92 px-2 py-0.5 text-[10px] font-mono font-bold text-[#141414]">
+                  <div className="absolute top-3 left-3 z-20 inline-flex items-center gap-1.5 bg-[#EAE6DF]/92 px-2 py-0.5 text-[10px] font-mono font-bold text-[#141414]">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#FF2E17]" />
                     <span>{slide.num}</span>
                   </div>
 
-                  <GlitchCardFrame>
-                    <WpkoiShowcaseArtwork variant={slide.variant} />
-                  </GlitchCardFrame>
+                  <ShowcaseCardMedia videoSrc={slide.videoSrc} variant={slide.variant} />
                 </a>
               ))}
             </div>
           </div>
         </div>
 
-        {/* === BOTTOM ROW: 4-COLUMN EXPERIENCE TIMELINE + VIEW FULL EXPERIENCE ↗ === */}
-        <div className="pt-4 flex flex-wrap items-end justify-between gap-6">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-5 gap-y-3">
+        {/* === BOTTOM ROW: SINGLE-LINE 4-COLUMN EXPERIENCE BAR + RIGHT-ALIGNED VIEW FULL EXPERIENCE ↗ === */}
+        <div className="pt-3 flex flex-col lg:flex-row lg:flex-nowrap items-start lg:items-end justify-between gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-3 xl:gap-x-5 gap-y-2.5 flex-1 min-w-0">
             {experienceItems.map((exp, idx) => (
               <div
                 key={exp.title}
-                className={`space-y-0.5 ${idx > 0 ? 'sm:border-l sm:border-white/15 sm:pl-4' : ''}`}
+                className={`space-y-0.5 min-w-0 ${
+                  idx > 0 ? 'sm:border-l sm:border-white/15 sm:pl-3 xl:pl-4' : ''
+                }`}
               >
-                <div className="font-mono text-[9px] tracking-[0.14em] uppercase text-[#8A8A8A]">
+                <div className="font-mono text-[8.5px] xl:text-[9px] tracking-[0.12em] uppercase text-[#8A8A8A] whitespace-nowrap">
                   {exp.period.split('→')[0]}
-                  <span className="text-[#FF2E17] mx-1">→</span>
+                  <span className="text-[#FF2E17] mx-0.5">→</span>
                   {exp.period.split('→')[1]}
                 </div>
-                <div className="font-display uppercase text-base sm:text-lg tracking-tight text-[#EAE6DF]">
+                <div className="font-display uppercase text-sm xl:text-base tracking-tight text-[#EAE6DF] truncate">
                   {exp.title}
                 </div>
-                <div className="font-mono text-[8.5px] leading-tight uppercase text-[#7C7974]">
+                <div className="font-mono text-[7.5px] xl:text-[8.5px] leading-tight uppercase text-[#7C7974]">
                   {exp.desc}
                 </div>
               </div>
@@ -405,13 +398,13 @@ export default function WorksShowcase({
             href="https://www.linkedin.com/in/danielkiss-web-development/"
             target="_blank"
             rel="noopener noreferrer"
-            className="boil-fast group relative inline-flex items-center gap-2 px-6 py-2 font-marker text-base sm:text-lg text-[#EAE6DF] hover:text-[#FF2E17] transition-colors shrink-0"
+            className="group relative inline-flex items-center gap-1.5 px-4 xl:px-6 py-1.5 xl:py-2 font-marker text-sm xl:text-base text-[#EAE6DF] hover:text-[#FF2E17] transition-colors whitespace-nowrap shrink-0"
           >
             <svg
               viewBox="0 0 280 54"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
-              className="pointer-events-none absolute inset-0 w-full h-full text-[#EAE6DF]/85 group-hover:text-[#EAE6DF] transition-colors"
+              className="pointer-events-none absolute inset-0 w-full h-full text-[#EAE6DF]/85"
               preserveAspectRatio="none"
             >
               <path
