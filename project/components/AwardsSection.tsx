@@ -430,13 +430,16 @@ export default function AwardsSection() {
   const isWheelHoveredRef = useRef(false);
   const hoveredListIdxRef = useRef<number | null>(null);
 
-  const [activeIndex, setActiveIndex] = useState<number>(6); // Starts highlighting CSSWINNER STAR
+  const [activeIndex, setActiveIndex] = useState<number>(6);
   const [hoveredListIdx, setHoveredListIdx] = useState<number | null>(null);
 
   useEffect(() => {
     const total = awardsList.length;
-    const stepDeg = 360 / total;
-    // Start with CSSWINNER STAR (index 6) right at top-center (0 deg)
+    const stepDeg = 21; // Tight fan matching danielkiss.hu (~5 certificates visible side-by-side)
+    const spanDeg = total * stepDeg; // 231 deg total loop
+    const halfSpan = spanDeg / 2; // Wraps invisibly offscreen at ±115.5 deg
+
+    // Start with CSSWINNER STAR (index 6) centered at 12 o'clock
     let wheelAngle = -6 * stepDeg;
     let scrollMomentum = 0;
     let lastScrollY = window.scrollY;
@@ -448,7 +451,7 @@ export default function AwardsSection() {
       const y = window.scrollY;
       const dy = y - lastScrollY;
       lastScrollY = y;
-      scrollMomentum = clamp(scrollMomentum + dy * 0.06, -45, 45);
+      scrollMomentum = clamp(scrollMomentum + dy * 0.05, -36, 36);
     };
 
     window.addEventListener('scroll', onScroll, { passive: true });
@@ -460,18 +463,19 @@ export default function AwardsSection() {
       const stage = arcStageRef.current;
       if (stage) {
         const stageW = stage.clientWidth || 900;
-        // Large circular radius so ~5 certificates form a sweeping semicircle across the left stage
-        const radius = Math.max(460, Math.min(640, stageW * 0.62));
+        const radius = Math.max(480, Math.min(640, stageW * 0.66));
 
-        // If user hovers an award in the text list, smoothly rotate that exact certificate to top-center
+        // If hovering an award in the text list, smoothly swing that certificate to top-center
         if (hoveredListIdxRef.current !== null) {
           const targetAngle = -hoveredListIdxRef.current * stepDeg;
-          const diff = ((((targetAngle - wheelAngle) % 360) + 540) % 360) - 180;
+          const diff =
+            ((((targetAngle - wheelAngle) % spanDeg) + spanDeg + halfSpan) % spanDeg) -
+            halfSpan;
           wheelAngle += diff * Math.min(1, dt * 6.5);
           scrollMomentum *= 0.85;
         } else {
-          // Autonomous continuous semicircular rotation (slows gently when hovering a certificate)
-          const baseSpeedDeg = isWheelHoveredRef.current ? 3.5 : 13.5;
+          // Continuous autonomous rotation (slows gently while hovering the wheel)
+          const baseSpeedDeg = isWheelHoveredRef.current ? 3 : 11;
           scrollMomentum *= 0.92;
           wheelAngle += (baseSpeedDeg + scrollMomentum) * dt;
         }
@@ -482,9 +486,9 @@ export default function AwardsSection() {
         cardRefs.current.forEach((cardEl, idx) => {
           if (!cardEl) return;
 
-          // Normalize each card's angle to [-180, 180] where 0 deg = straight up (12 o'clock)
           const rawDeg = idx * stepDeg + wheelAngle;
-          const deg = ((((rawDeg % 360) + 540) % 360) - 180);
+          const deg =
+            ((((rawDeg % spanDeg) + spanDeg + halfSpan) % spanDeg) - halfSpan);
           const absDeg = Math.abs(deg);
 
           if (absDeg < closestDist) {
@@ -492,8 +496,7 @@ export default function AwardsSection() {
             closestIdx = idx;
           }
 
-          // Hide certificates on the unseen lower half of the circle
-          if (absDeg > 92) {
+          if (absDeg > 84) {
             cardEl.style.opacity = '0';
             cardEl.style.visibility = 'hidden';
             return;
@@ -502,8 +505,8 @@ export default function AwardsSection() {
           const rad = (deg * Math.PI) / 180;
           const x = Math.sin(rad) * radius;
           const y = (1 - Math.cos(rad)) * radius;
-          const opacity = clamp(1.12 - Math.max(0, absDeg - 28) / 56, 0, 1);
-          const scale = 1 - (absDeg / 90) * 0.08;
+          const opacity = clamp(1.15 - Math.max(0, absDeg - 26) / 52, 0, 1);
+          const scale = 1 - (absDeg / 90) * 0.06;
           const zIndex = Math.round(50 - absDeg * 0.4);
 
           cardEl.style.visibility = 'visible';
@@ -576,7 +579,7 @@ export default function AwardsSection() {
           </h2>
 
           {/* === TWO-COLUMN SELECTED RECOGNITIONS LIST === */}
-          <div className="mt-10 sm:mt-14">
+          <div className="mt-8 sm:mt-10">
             <div className="font-mono text-[10px] sm:text-[11px] font-bold tracking-[0.18em] uppercase text-[#EAE6DF] mb-3.5">
               SELECTED RECOGNITIONS
             </div>
@@ -630,7 +633,7 @@ export default function AwardsSection() {
         onMouseLeave={() => {
           isWheelHoveredRef.current = false;
         }}
-        className="relative mt-10 sm:mt-14 w-full h-[460px] sm:h-[540px] lg:h-[580px] overflow-hidden"
+        className="relative mt-6 sm:mt-8 w-full h-[460px] sm:h-[520px] lg:h-[550px] overflow-hidden"
         style={{
           WebkitMaskImage:
             'linear-gradient(to bottom, black 0%, black 78%, transparent 100%)',
@@ -652,7 +655,7 @@ export default function AwardsSection() {
             onMouseLeave={() => setHoveredListIdx(null)}
             style={{
               left: '50%',
-              top: '28px',
+              top: '14px',
               opacity: 0,
               visibility: 'hidden',
             }}
@@ -665,7 +668,7 @@ export default function AwardsSection() {
         ))}
 
         {/* Centered Handwritten "AWARDS ↗" Inside the Lower Curve of the Semicircle */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-14 sm:bottom-16 z-[60] flex justify-center">
+        <div className="pointer-events-none absolute inset-x-0 bottom-12 sm:bottom-14 z-[60] flex justify-center">
           <div className="font-marker text-3xl sm:text-5xl lg:text-[54px] tracking-wide text-[#EAE6DF] drop-shadow-[0_6px_24px_rgba(0,0,0,0.9)] flex items-center gap-3 -rotate-2">
             <span>AWARDS</span>
             <svg
