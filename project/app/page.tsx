@@ -8,25 +8,6 @@ import SkillsSection from '@/components/SkillsSection';
 import WorksSection from '@/components/WorksSection';
 import AwardsSection from '@/components/AwardsSection';
 
-const experiences = [
-  { period: '2022 → Now', title: 'wwwows.com', desc: 'WordPress Block Theme Developer' },
-  { period: '2015 → 2017', title: 'Webzakt', desc: 'WordPress Theme Developer' },
-  { period: '2012 → 2019', title: 'Freelance Works', desc: 'Web Development & Client Projects' },
-  { period: '2009 → 2012', title: 'Filmmaker', desc: 'Video Editing' },
-];
-
-const awards = [
-  { name: 'CSSDA Special Kudos (WPKoi)', url: 'https://www.cssdesignawards.com/sites/wpkoi-wordpress-themes/49813/' },
-  { name: 'CSSDA Innovation Public Award (WPKoi)', url: 'https://www.cssdesignawards.com/sites/wpkoi-wordpress-themes/49813/' },
-  { name: 'CSSDA UI Public Award (WPKoi)', url: 'https://www.cssdesignawards.com/sites/wpkoi-wordpress-themes/49813/' },
-  { name: 'CSSDA UX Public Award (WPKoi)', url: 'https://www.cssdesignawards.com/sites/wpkoi-wordpress-themes/49813/' },
-  { name: 'CSSWinner SOTD (danielkiss.hu)', url: 'https://www.csswinner.com/details/daniel-kiss-creative-development/19398' },
-  { name: 'Design Nominees SOTD (danielkiss.hu)', url: 'https://www.designnominees.com/sites/daniel-kiss-creative-web-development' },
-  { name: 'Design Nominees TOTD (Hrasva)', url: 'https://www.designnominees.com/themes/hrasva-wpkoi-wordpress-theme' },
-  { name: 'Design Nominees TOTD (Lovebird)', url: 'https://www.designnominees.com/themes/lovebird' },
-  { name: 'CSS Nectar SOTD (WPKoi)', url: 'https://cssnectar.com/css-gallery-inspiration/wpkoi-wordpress-themes/' },
-];
-
 const socialLinks = [
   { label: 'LinkedIn', url: 'https://www.linkedin.com/in/danielkiss-web-development/' },
   { label: 'WordPress', url: 'https://profiles.wordpress.org/wpkoithemes/' },
@@ -42,13 +23,11 @@ const trackedSections = [
 ];
 
 export default function Home() {
-  const [loading, setLoading] = useState(true);
+  const [showLoader, setShowLoader] = useState(true);
   const [currentSection, setCurrentSection] = useState('INTRODUCE');
 
-  // Lightweight scroll spy to highlight the active section in the docked right sidebar
+  // Lightweight scroll spy to keep the docked right sidebar synced
   useEffect(() => {
-    if (loading) return;
-
     const updateActiveSection = () => {
       const triggerY = window.innerHeight * 0.45;
       let active = 'INTRODUCE';
@@ -69,28 +48,28 @@ export default function Home() {
     updateActiveSection();
 
     return () => window.removeEventListener('scroll', updateActiveSection);
-  }, [loading]);
-
-  if (loading) {
-    return <Loader onComplete={() => setLoading(false)} />;
-  }
+  }, []);
 
   return (
     <>
+      {/* Curtain Loader mounts ABOVE the live Hero and slides straight up at 100% */}
+      {showLoader && <Loader onComplete={() => setShowLoader(false)} />}
+
       {/* 01 INTRODUCE (Hero Stage 1 -> Stage 2 + Docked Right Sidebar + Fixed WebGL Background) */}
       <HeroSection currentSection={currentSection} />
 
-      {/* overflow-x-clip keeps position:sticky working inside WorksSection */}
+      {/* overflow-x-clip preserves position:sticky inside WorksSection */}
       <main className="relative bg-transparent text-[#EAE6DF] overflow-x-clip">
         <div className="main-content relative z-20 lg:pr-[375px] xl:pr-[405px]">
-          {/* === 02 SKILLS (Staggered Zig-Zag Typography + "THIS IS THE FUN PART! ->") === */}
+          {/* === 02 SKILLS === */}
           <SkillsSection />
 
-          {/* === 03 WORKS (WPKoi Sticky Horizontal Showcase) === */}
+          {/* === 03 WORKS (3-Stage In-Place Morph + 4-Column Experience Bar) === */}
           <WorksSection />
 
-
+          {/* === 04 AWARDS (Selected Recognitions + Semicircular Certificate Wheel) === */}
           <AwardsSection />
+
           {/* === 05 CONTACT === */}
           <section
             id="contact"
