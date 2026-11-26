@@ -142,6 +142,166 @@
 .glitch-active {
   animation: nav-glitch-slice 0.18s steps(2, end) infinite;
 }
+/* Hand-drawn stop-motion "boil" micro-shake so headings, strokes & callouts feel alive */
+@keyframes hand-boil {
+  0% {
+    transform: translate3d(0px, 0px, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate3d(0.8px, -0.7px, 0) rotate(0.35deg);
+  }
+  50% {
+    transform: translate3d(-0.8px, 0.6px, 0) rotate(-0.35deg);
+  }
+  75% {
+    transform: translate3d(0.6px, 0.8px, 0) rotate(0.25deg);
+  }
+  100% {
+    transform: translate3d(-0.6px, -0.5px, 0) rotate(-0.2deg);
+  }
+}
+
+.boil-subtle {
+  animation: hand-boil 0.42s steps(2, end) infinite;
+}
+
+.boil-fast {
+  animation: hand-boil 0.28s steps(2, end) infinite;
+}
+
+/* Intermittent kinetic glitch blink for display headlines & counters */
+@keyframes kinetic-flicker {
+  0%, 88%, 100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) skewX(0deg);
+    filter: none;
+  }
+  90% {
+    opacity: 0.72;
+    transform: translate3d(-2px, 0.5px, 0) skewX(-4deg);
+    filter: drop-shadow(2px 0 #ff2e17) drop-shadow(-2px 0 #00f0ff);
+  }
+  93% {
+    opacity: 1;
+    transform: translate3d(2px, -0.5px, 0) skewX(3deg);
+    filter: drop-shadow(-2px 0 #ff2e17);
+  }
+  96% {
+    opacity: 0.84;
+    transform: translate3d(-1px, 0, 0) skewX(-2deg);
+    filter: none;
+  }
+}
+
+.kinetic-blink {
+  animation: kinetic-flicker 3.6s steps(2, end) infinite;
+}
+
+/* Intense RGB chromatic aberration + horizontal VHS slice shake on card hover */
+@keyframes rgb-card-shake {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  20% {
+    transform: translate3d(-3px, 1px, 0) skewX(-2deg);
+  }
+  40% {
+    transform: translate3d(3px, -1px, 0) skewX(2deg);
+  }
+  60% {
+    transform: translate3d(-2px, -1px, 0) skewX(-1deg);
+  }
+  80% {
+    transform: translate3d(2px, 1px, 0) skewX(1.5deg);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes rgb-slice-a {
+  0% {
+    clip-path: inset(8% 0 68% 0);
+    transform: translate3d(-7px, 0, 0);
+  }
+  33% {
+    clip-path: inset(44% 0 28% 0);
+    transform: translate3d(6px, -2px, 0);
+  }
+  66% {
+    clip-path: inset(72% 0 6% 0);
+    transform: translate3d(-5px, 1px, 0);
+  }
+  100% {
+    clip-path: inset(18% 0 54% 0);
+    transform: translate3d(5px, 0, 0);
+  }
+}
+
+@keyframes rgb-slice-b {
+  0% {
+    clip-path: inset(56% 0 18% 0);
+    transform: translate3d(7px, 1px, 0);
+  }
+  33% {
+    clip-path: inset(12% 0 64% 0);
+    transform: translate3d(-6px, -1px, 0);
+  }
+  66% {
+    clip-path: inset(34% 0 42% 0);
+    transform: translate3d(5px, 2px, 0);
+  }
+  100% {
+    clip-path: inset(68% 0 10% 0);
+    transform: translate3d(-7px, 0, 0);
+  }
+}
+
+.glitch-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.group:hover .glitch-card-inner {
+  animation: rgb-card-shake 0.22s steps(2, end) infinite;
+}
+
+.glitch-layer-cyan,
+.glitch-layer-red,
+.glitch-layer-yellow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+
+.group:hover .glitch-layer-cyan {
+  opacity: 0.78;
+  mix-blend-mode: screen;
+  filter: hue-rotate(155deg) saturate(3.2) contrast(1.4);
+  animation: rgb-slice-a 0.24s steps(2, end) infinite;
+}
+
+.group:hover .glitch-layer-red {
+  opacity: 0.78;
+  mix-blend-mode: screen;
+  filter: hue-rotate(-35deg) saturate(3.5) contrast(1.5);
+  animation: rgb-slice-b 0.2s steps(2, end) infinite;
+}
+
+.group:hover .glitch-layer-yellow {
+  opacity: 0.35;
+  mix-blend-mode: color-dodge;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(255, 238, 0, 0.45) 0px,
+    rgba(255, 238, 0, 0.45) 2px,
+    rgba(0, 240, 255, 0.35) 2px,
+    rgba(255, 0, 140, 0.35) 4px
+  );
+}
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
