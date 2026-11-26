@@ -56,7 +56,7 @@ export default function Home() {
 
       <HeroSection
         currentSection={currentSection}
-        sidebarPhase={sidebarPhase}
+        // sidebarPhase={0}
         sidebarDismissRef={sidebarDismissRef}
       />
 
