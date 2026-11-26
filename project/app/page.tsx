@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import Loader from '@/components/Loader';
-import Reveal from '@/components/Reveal';
 import HeroSection from '@/components/HeroSection';
 import SkillsSection from '@/components/SkillsSection';
 import WorksSection from '@/components/WorksSection';
 import AwardsSection from '@/components/AwardsSection';
+import FilmNoiseOverlay from '@/components/FilmNoiseOverlay';
+import Reveal from '@/components/Reveal';
 
 const socialLinks = [
   { label: 'LinkedIn', url: 'https://www.linkedin.com/in/danielkiss-web-development/' },
@@ -22,9 +23,11 @@ const trackedSections = [
   { id: 'contact', name: 'CONTACT' },
 ];
 
+
 export default function Home() {
   const [showLoader, setShowLoader] = useState(true);
   const [currentSection, setCurrentSection] = useState('INTRODUCE');
+  const [sidebarPhase, setSidebarPhase] = useState<0 | 1 | 2>(0);
 
   // Lightweight scroll spy to keep the docked right sidebar synced
   useEffect(() => {
@@ -54,21 +57,15 @@ export default function Home() {
     <>
       {/* Curtain Loader mounts ABOVE the live Hero and slides straight up at 100% */}
       {showLoader && <Loader onComplete={() => setShowLoader(false)} />}
-
+    
       {/* 01 INTRODUCE (Hero Stage 1 -> Stage 2 + Docked Right Sidebar + Fixed WebGL Background) */}
-      <HeroSection currentSection={currentSection} />
-
-      {/* overflow-x-clip preserves position:sticky inside WorksSection */}
-      <main className="relative bg-transparent text-[#EAE6DF] overflow-x-clip">
-        <div className="main-content relative z-20 lg:pr-[375px] xl:pr-[405px]">
-          {/* === 02 SKILLS === */}
-          <SkillsSection />
-
-          {/* === 03 WORKS (3-Stage In-Place Morph + 4-Column Experience Bar) === */}
-          <WorksSection />
-
-          {/* === 04 AWARDS (Selected Recognitions + Semicircular Certificate Wheel) === */}
-          <AwardsSection />
+          <HeroSection currentSection={currentSection} sidebarPhase={sidebarPhase} />
+             <FilmNoiseOverlay />
+<main className="relative bg-transparent text-[#EAE6DF] overflow-x-clip">
+  <div className="main-content relative z-20 lg:pr-[375px] xl:pr-[405px]">
+    <SkillsSection />
+    <WorksSection onSidebarPhaseChange={setSidebarPhase} />
+    <AwardsSection />
 
           {/* === 05 CONTACT === */}
           <section
