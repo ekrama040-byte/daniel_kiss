@@ -1,6 +1,5 @@
 'use client';
-
-import { useEffect, useRef, useState, Suspense } from 'react';
+import { useEffect, useRef, useState, Suspense, type MutableRefObject } from 'react';
 import dynamic from 'next/dynamic';
 
 const HeroScene = dynamic(() => import('@/components/HeroScene'), { ssr: false });
@@ -206,14 +205,16 @@ interface RectDelta {
   y: number;
   scale: number;
 }
-
 export default function HeroSection({
   currentSection = 'INTRODUCE',
   sidebarPhase = 0,
+  sidebarDismissRef,
 }: {
   currentSection?: string;
   sidebarPhase?: 0 | 1 | 2;
+  sidebarDismissRef?: MutableRefObject<number>;
 }) {
+
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   // Origin anchors + flying Stage 1 elements
@@ -421,14 +422,17 @@ export default function HeroSection({
         flyingPortraitRef.current.style.opacity = String(flyingAlpha);
         flyingPortraitRef.current.style.visibility = flyingAlpha > 0.01 ? 'visible' : 'hidden';
       }
-
-      // 4. Right Profile Sidebar Shell & Docked Elements
-      const shellAlpha = easeOutCubic(seg(p, 0.15, 0.5));
-      if (sidebarShellRef.current) {
-        sidebarShellRef.current.style.opacity = String(shellAlpha);
-        sidebarShellRef.current.style.visibility = shellAlpha > 0.01 ? 'visible' : 'hidden';
-      }
-
+      // 4. Right Profile Sidebar Shell & Docked Elements (tilts & slides right when Contact enters)
+   const dismissT = easeInOutCubic(clamp(sidebarDismissRef?.current ?? 0, 0, 1));
+   const shellAlpha = easeOutCubic(seg(p, 0.15, 0.5)) * (1 - dismissT);
+   if (sidebarShellRef.current) {
+     sidebarShellRef.current.style.opacity = String(shellAlpha);
+     sidebarShellRef.current.style.visibility = shellAlpha > 0.01 ? 'visible' : 'hidden';
+     sidebarShellRef.current.style.pointerEvents = dismissT > 0.25 ? 'none' : 'auto';
+     sidebarShellRef.current.style.transform = `translate3d(${dismissT * 115}%, ${
+       dismissT * 24
+     }px, 0) rotate(${dismissT * 5}deg)`;
+   }
       [targetNameRef.current, targetCodeRef.current, targetPortraitRef.current].forEach((el) => {
         if (!el) return;
         el.style.opacity = String(dockedAlpha);
