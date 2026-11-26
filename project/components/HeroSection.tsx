@@ -9,7 +9,8 @@ const FALLBACK_PORTRAIT =
   'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=80';
 
 const GLITCH_CHARS = '!<>-_\\/[]{}—=+*^?#01X';
-const TAGLINE_WORDS = ['WEBGL', 'CHAOS', 'WEIRD'];
+const TAGLINE_WORDS = ['WEBGL', 'WEIRD', 'CHAOS', 'UNUSUAL'];
+
 
 const navItems = [
   { num: '01', label: 'INTRODUCE', href: '#introduce' },
