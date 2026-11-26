@@ -11,7 +11,6 @@ const FALLBACK_PORTRAIT =
 const GLITCH_CHARS = '!<>-_\\/[]{}—=+*^?#01X';
 const TAGLINE_WORDS = ['WEBGL', 'WEIRD', 'CHAOS', 'UNUSUAL'];
 
-
 const navItems = [
   { num: '01', label: 'INTRODUCE', href: '#introduce' },
   { num: '02', label: 'SKILLS', href: '#skills' },
@@ -20,7 +19,6 @@ const navItems = [
   { num: '05', label: 'CONTACT', href: '#contact' },
 ];
 
-// Order for sequential step-by-step word blinking on Page 1
 const BLINK_SEQUENCE = [
   'TAGLINE',
   'INTRODUCE',
@@ -95,6 +93,114 @@ function BlinkWord({
   );
 }
 
+// 2x3 WPKoi Mini-Showcase Grid that replaces PORTRAIT / 01 in Sidebar Phase 1 & 2
+function SidebarWpkoiGrid() {
+  return (
+    <div className="w-full h-full grid grid-cols-2 grid-rows-3 gap-2">
+      {/* Tile 1: WPKOI TRENDING */}
+      <a
+        href="https://wpkoi.com/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="relative bg-[#111] border border-white/15 p-1.5 flex flex-col justify-between overflow-hidden hover:border-[#FF2E17] transition-colors"
+      >
+        <div className="font-display text-[11px] leading-none">
+          <span className="text-[#FF2E17]">WPKOI.</span>
+          <span className="text-[#EAE6DF]">THEMES</span>
+        </div>
+        <div className="h-1 bg-[#D9C826] w-full my-0.5" />
+        <div className="font-display text-[10px] tracking-tight text-[#EAE6DF]">TRENDING</div>
+      </a>
+
+      {/* Tile 2: THEME WALL */}
+      <a
+        href="https://wpkoi.com/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="relative bg-[#181818] border border-white/15 p-1 grid grid-cols-3 gap-1 overflow-hidden hover:border-[#FF2E17] transition-colors"
+      >
+        <div className="bg-[#D8BE3A]" />
+        <div className="bg-[#EAE6DF]" />
+        <div className="bg-[#C8281D]" />
+        <div className="bg-[#C9C2B2]" />
+        <div className="bg-[#2B59D8]" />
+        <div className="bg-[#EAE6DF]" />
+      </a>
+
+      {/* Tile 3: CREATE WITHOUT LIMITS */}
+      <a
+        href="https://wpkoi.com/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="relative bg-[#ECEAE4] text-[#141414] border border-white/15 p-1.5 flex flex-col justify-between overflow-hidden hover:border-[#FF2E17] transition-colors"
+      >
+        <div className="grid grid-cols-3 gap-0.5 flex-1 mb-1">
+          <div className="bg-[#141414]" />
+          <div className="bg-[#C8281D]" />
+          <div className="bg-[#D8BE3A]" />
+        </div>
+        <div className="font-mono text-[6px] font-bold uppercase text-center truncate">
+          CREATE WITHOUT LIMITS
+        </div>
+      </a>
+
+      {/* Tile 4: THEMES BY COLOR */}
+      <a
+        href="https://wpkoi.com/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="relative bg-[#141414] border border-white/15 p-1.5 flex flex-col justify-between overflow-hidden hover:border-[#FF2E17] transition-colors"
+      >
+        <div className="font-display text-[8px] uppercase text-[#EAE6DF] leading-none">
+          THEMES BY
+        </div>
+        <div className="bg-[#D5D1C8] text-[#C8281D] font-display text-[11px] text-center leading-none py-0.5">
+          NEXUS
+        </div>
+        <div className="font-display text-[9px] uppercase text-[#EAE6DF] leading-none">
+          COLOR
+        </div>
+      </a>
+
+      {/* Tile 5: EXPLORE THE TOOLKIT */}
+      <a
+        href="https://wpkoi.com/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="relative bg-[#121212] border border-white/15 p-1.5 flex flex-col justify-between overflow-hidden hover:border-[#FF2E17] transition-colors"
+      >
+        <div className="font-mono text-[5.5px] uppercase text-[#9A9792]">
+          EXPLORE THE TOOLKIT
+        </div>
+        <div className="flex gap-1 flex-1 mt-1">
+          <div className="w-1/2 bg-[#222] border border-white/10" />
+          <div className="w-1/2 bg-[#C7522A]/80" />
+        </div>
+      </a>
+
+      {/* Tile 6: HRASVA */}
+      <a
+        href="https://wpkoi.com/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="relative bg-[#151515] border border-white/15 p-1.5 flex flex-col justify-between overflow-hidden hover:border-[#FF2E17] transition-colors"
+      >
+        <div className="font-display text-[9px] uppercase text-[#EAE6DF] leading-none">
+          HRASVA
+        </div>
+        <div className="flex items-center gap-1 mt-1 flex-1">
+          <div className="w-1/2 h-full bg-[#D5D1C8] text-[#C8281D] font-display text-[8px] flex items-center justify-center">
+            NEXUS
+          </div>
+          <div className="w-1/2 font-mono text-[5px] text-[#9A9792] leading-tight">
+            CREATIVE DESIGN
+          </div>
+        </div>
+      </a>
+    </div>
+  );
+}
+
 interface RectDelta {
   x: number;
   y: number;
@@ -103,12 +209,14 @@ interface RectDelta {
 
 export default function HeroSection({
   currentSection = 'INTRODUCE',
+  sidebarPhase = 0,
 }: {
   currentSection?: string;
+  sidebarPhase?: 0 | 1 | 2;
 }) {
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-  // Static origin anchors (never transformed) + flying elements
+  // Origin anchors + flying Stage 1 elements
   const nameOriginRef = useRef<HTMLDivElement>(null);
   const flyingNameRef = useRef<HTMLHeadingElement>(null);
 
@@ -121,12 +229,12 @@ export default function HeroSection({
   const portraitOriginRef = useRef<HTMLDivElement>(null);
   const flyingPortraitRef = useRef<HTMLDivElement>(null);
 
-  // Stage 1-only decorative layers that fade away when walking begins
+  // Stage 1-only decorative layers
   const stage1TopMetaRef = useRef<HTMLDivElement>(null);
   const stage1MisbehaveRef = useRef<HTMLDivElement>(null);
   const stage1BottomBarRef = useRef<HTMLDivElement>(null);
 
-  // Fixed Right Sidebar shell + crisp docked targets
+  // Fixed Right Sidebar shell + targets
   const sidebarShellRef = useRef<HTMLElement>(null);
   const targetNameRef = useRef<HTMLDivElement>(null);
   const targetCodeRef = useRef<HTMLDivElement>(null);
@@ -134,19 +242,20 @@ export default function HeroSection({
   const targetPortraitRef = useRef<HTMLDivElement>(null);
   const sidebarDetailRefs = useRef<(HTMLElement | null)[]>([]);
 
-  // Stage 2 Left Content refs (strictly hidden at scroll = 0)
+  // Stage 2 Left Content refs
   const stage2ContainerRef = useRef<HTMLDivElement>(null);
   const scatterCharRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const stage2BrushRef = useRef<HTMLDivElement>(null);
   const stage2NoteRef = useRef<HTMLParagraphElement>(null);
   const stage2StatRefs = useRef<(HTMLElement | null)[]>([]);
 
-  // Direct DOM refs for 60fps rulers & telemetry
+  // Live rulers & telemetry refs
   const xArrowRef = useRef<HTMLSpanElement>(null);
   const yArrowRef = useRef<HTMLSpanElement>(null);
   const telemetryRef = useRef<HTMLDivElement>(null);
   const leftTickRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const mousePos = useRef({ x: 760, y: 361 });
+  const sidebarPhaseRef = useRef<0 | 1 | 2>(sidebarPhase);
 
   const [activeNav, setActiveNav] = useState(currentSection);
   const [lang, setLang] = useState<'HU' | 'EN'>('HU');
@@ -157,7 +266,11 @@ export default function HeroSection({
     setActiveNav(currentSection);
   }, [currentSection]);
 
-  // Step-by-step word blinking loop (one word glitches every ~1.1s in sequence)
+  useEffect(() => {
+    sidebarPhaseRef.current = sidebarPhase;
+  }, [sidebarPhase]);
+
+  // Step-by-step word blinking sequence
   useEffect(() => {
     const id = window.setInterval(() => {
       setBlinkStep((prev) => {
@@ -171,7 +284,7 @@ export default function HeroSection({
     return () => window.clearInterval(id);
   }, []);
 
-  // Deterministic 60fps Scroll Morph + Telemetry Loop (ZERO GSAP ScrollTrigger conflicts)
+  // 60fps Deterministic Scroll Morph + Telemetry Loop
   useEffect(() => {
     const deltas: {
       name: RectDelta;
@@ -230,7 +343,7 @@ export default function HeroSection({
     const applyVisualState = (p: number, rawY: number) => {
       const isDesktop = window.innerWidth >= 1024;
 
-      // 1. Live Rulers & Right-Edge Telemetry
+      // 1. Live Rulers & Edge Telemetry
       const maxScroll = Math.max(
         document.documentElement.scrollHeight - window.innerHeight,
         1
@@ -240,15 +353,14 @@ export default function HeroSection({
         const xStr = String(mousePos.current.x).padStart(4, '0');
         const yStr = String(mousePos.current.y).padStart(4, '0');
         const pStr = String(pct).padStart(3, '0');
-        const badge = pct > 5 ? '   14+ YEARS / WEB   ' : '   ';
-        telemetryRef.current.textContent = `X:${xStr}  Y:${yStr}  P:${pStr}%${badge}S:${activeNav}`;
+        telemetryRef.current.textContent = `X:${xStr}  Y:${yStr}  P:${pStr}%  S:${activeNav}`;
       }
       leftTickRefs.current.forEach((el, idx) => {
         if (el) el.textContent = String(Math.round(rawY) + verticalOffsets[idx]);
       });
 
-      // 2. Stage 1 Decorative Prompts (fade out cleanly as walking starts: 0.00 -> 0.16)
-      const decFade = 1 - easeOutCubic(seg(p, 0.0, 0.16));
+      // 2. Stage 1 Decorative Prompts fade out as walking begins
+      const decFade = 1 - easeOutCubic(seg(p, 0.0, 0.18));
       [stage1TopMetaRef.current, stage1MisbehaveRef.current, stage1BottomBarRef.current].forEach(
         (el) => {
           if (!el) return;
@@ -258,18 +370,17 @@ export default function HeroSection({
         }
       );
 
-      // 3. Flying Page 1 Elements Walking into Right Sidebar (0.00 -> 0.50)
-      const walkT = easeInOutCubic(seg(p, 0.0, 0.5));
-      const handoffDone = p >= 0.5;
-      const flyingAlpha = handoffDone ? 0 : 1 - seg(p, 0.45, 0.5);
-      const dockedAlpha = seg(p, 0.44, 0.5);
+      // 3. Flying Page 1 Elements Walking into Right Sidebar (0.00 -> 0.56)
+      const walkT = easeInOutCubic(seg(p, 0.0, 0.56));
+      const handoffDone = p >= 0.56;
+      const flyingAlpha = handoffDone ? 0 : 1 - seg(p, 0.5, 0.56);
+      const dockedAlpha = seg(p, 0.49, 0.56);
 
       if (flyingNameRef.current) {
         if (isDesktop) {
-          const x = deltas.name.x * walkT;
-          const y = deltas.name.y * walkT;
-          const sc = 1 + (deltas.name.scale - 1) * walkT;
-          flyingNameRef.current.style.transform = `translate3d(${x}px, ${y}px, 0) scale(${sc})`;
+          flyingNameRef.current.style.transform = `translate3d(${deltas.name.x * walkT}px, ${
+            deltas.name.y * walkT
+          }px, 0) scale(${1 + (deltas.name.scale - 1) * walkT})`;
         } else {
           flyingNameRef.current.style.transform = `translate3d(${-walkT * 60}px, 0, 0)`;
         }
@@ -279,23 +390,21 @@ export default function HeroSection({
 
       if (flyingCodeRef.current) {
         if (isDesktop) {
-          const x = deltas.code.x * walkT;
-          const y = deltas.code.y * walkT;
-          const sc = 1 + (deltas.code.scale - 1) * walkT;
-          flyingCodeRef.current.style.transform = `translate3d(${x}px, ${y}px, 0) scale(${sc})`;
+          flyingCodeRef.current.style.transform = `translate3d(${deltas.code.x * walkT}px, ${
+            deltas.code.y * walkT
+          }px, 0) scale(${1 + (deltas.code.scale - 1) * walkT})`;
         }
         flyingCodeRef.current.style.opacity = String(flyingAlpha);
         flyingCodeRef.current.style.visibility = flyingAlpha > 0.01 ? 'visible' : 'hidden';
       }
 
       if (flyingNavRef.current) {
-        const navWalk = easeInOutCubic(seg(p, 0.0, 0.42));
-        const navAlpha = 1 - seg(p, 0.28, 0.44);
+        const navWalk = easeInOutCubic(seg(p, 0.0, 0.46));
+        const navAlpha = 1 - seg(p, 0.3, 0.48);
         if (isDesktop) {
-          const x = deltas.nav.x * navWalk;
-          const y = deltas.nav.y * navWalk;
-          const sc = 1 - 0.18 * navWalk;
-          flyingNavRef.current.style.transform = `translate3d(${x}px, ${y}px, 0) scale(${sc})`;
+          flyingNavRef.current.style.transform = `translate3d(${deltas.nav.x * navWalk}px, ${
+            deltas.nav.y * navWalk
+          }px, 0) scale(${1 - 0.18 * navWalk})`;
         }
         flyingNavRef.current.style.opacity = String(navAlpha);
         flyingNavRef.current.style.visibility = navAlpha > 0.01 ? 'visible' : 'hidden';
@@ -303,17 +412,18 @@ export default function HeroSection({
 
       if (flyingPortraitRef.current) {
         if (isDesktop) {
-          const x = deltas.portrait.x * walkT;
-          const y = deltas.portrait.y * walkT;
-          const sc = 1 + (deltas.portrait.scale - 1) * walkT;
-          flyingPortraitRef.current.style.transform = `translate3d(${x}px, ${y}px, 0) scale(${sc})`;
+          flyingPortraitRef.current.style.transform = `translate3d(${
+            deltas.portrait.x * walkT
+          }px, ${deltas.portrait.y * walkT}px, 0) scale(${
+            1 + (deltas.portrait.scale - 1) * walkT
+          })`;
         }
         flyingPortraitRef.current.style.opacity = String(flyingAlpha);
         flyingPortraitRef.current.style.visibility = flyingAlpha > 0.01 ? 'visible' : 'hidden';
       }
 
-      // 4. Right Profile Sidebar Shell & Docked Elements (stays permanently docked once p >= 0.50)
-      const shellAlpha = easeOutCubic(seg(p, 0.14, 0.46));
+      // 4. Right Profile Sidebar Shell & Docked Elements
+      const shellAlpha = easeOutCubic(seg(p, 0.15, 0.5));
       if (sidebarShellRef.current) {
         sidebarShellRef.current.style.opacity = String(shellAlpha);
         sidebarShellRef.current.style.visibility = shellAlpha > 0.01 ? 'visible' : 'hidden';
@@ -326,7 +436,7 @@ export default function HeroSection({
       });
 
       if (targetNavRef.current) {
-        const compactNavAlpha = easeOutCubic(seg(p, 0.34, 0.52));
+        const compactNavAlpha = easeOutCubic(seg(p, 0.38, 0.58));
         targetNavRef.current.style.opacity = String(compactNavAlpha);
         targetNavRef.current.style.visibility = compactNavAlpha > 0.01 ? 'visible' : 'hidden';
         targetNavRef.current.style.transform = `translate3d(0, ${(1 - compactNavAlpha) * -10}px, 0)`;
@@ -334,23 +444,20 @@ export default function HeroSection({
 
       sidebarDetailRefs.current.forEach((el, idx) => {
         if (!el) return;
-        const start = 0.28 + idx * 0.05;
-        const t = easeOutCubic(seg(p, start, start + 0.18));
+        const start = 0.32 + idx * 0.05;
+        const t = easeOutCubic(seg(p, start, start + 0.2));
         el.style.opacity = String(t);
         el.style.visibility = t > 0.01 ? 'visible' : 'hidden';
         el.style.transform = `translate3d(0, ${(1 - t) * 12}px, 0)`;
       });
 
-      // 5. Stage 2 Left Content (STRICTLY invisible at p < 0.14, builds letter-by-letter as Stage 1 walks right)
-      const stage2Visible = p > 0.14;
+      // 5. Stage 2 Left Content (Builds cleanly & stays visible to scroll naturally into 02 SKILLS!)
+      const stage2Visible = p > 0.16;
       if (stage2ContainerRef.current) {
-        const exitT = seg(p, 0.86, 1.0);
         stage2ContainerRef.current.style.visibility = stage2Visible ? 'visible' : 'hidden';
-        stage2ContainerRef.current.style.opacity = stage2Visible ? String(1 - exitT) : '0';
-        stage2ContainerRef.current.style.transform = `translate3d(0, ${-exitT * 120}px, 0)`;
+        stage2ContainerRef.current.style.opacity = stage2Visible ? '1' : '0';
       }
 
-      // Scattered characters of "MAKE IT WORK," + "THEN MAKE IT WEIRD..." assemble sequentially
       const totalChars = scatterCharRefs.current.length;
       scatterCharRefs.current.forEach((el, idx) => {
         if (!el) return;
@@ -359,8 +466,8 @@ export default function HeroSection({
           el.style.visibility = 'hidden';
           return;
         }
-        const charStart = 0.16 + (idx / Math.max(totalChars, 1)) * 0.28;
-        const t = easeOutCubic(seg(p, charStart, charStart + 0.16));
+        const charStart = 0.18 + (idx / Math.max(totalChars, 1)) * 0.3;
+        const t = easeOutCubic(seg(p, charStart, charStart + 0.18));
         const tilt = CHAR_TILTS[idx % CHAR_TILTS.length];
         const dy = (idx % 2 === 0 ? -1 : 1) * (18 + (idx % 4) * 5);
         el.style.opacity = String(t);
@@ -370,27 +477,24 @@ export default function HeroSection({
         })`;
       });
 
-      // White brush sweeps across left-to-right (0.46 -> 0.58)
       if (stage2BrushRef.current) {
-        const bt = easeOutCubic(seg(p, 0.46, 0.58));
+        const bt = easeOutCubic(seg(p, 0.52, 0.66));
         stage2BrushRef.current.style.opacity = String(bt);
         stage2BrushRef.current.style.visibility = bt > 0.01 ? 'visible' : 'hidden';
         stage2BrushRef.current.style.clipPath = `inset(0 ${(1 - bt) * 100}% 0 0)`;
       }
 
-      // WordPress tagline appears (0.52 -> 0.62)
       if (stage2NoteRef.current) {
-        const nt = easeOutCubic(seg(p, 0.52, 0.62));
+        const nt = easeOutCubic(seg(p, 0.6, 0.72));
         stage2NoteRef.current.style.opacity = String(nt);
         stage2NoteRef.current.style.visibility = nt > 0.01 ? 'visible' : 'hidden';
         stage2NoteRef.current.style.transform = `translate3d(0, ${(1 - nt) * 16}px, 0)`;
       }
 
-      // Stats (↗, 14+, 500+, 200+) appear one by one (0.58 -> 0.78)
       stage2StatRefs.current.forEach((el, idx) => {
         if (!el) return;
-        const start = 0.58 + idx * 0.045;
-        const st = easeOutCubic(seg(p, start, start + 0.14));
+        const start = 0.66 + idx * 0.055;
+        const st = easeOutCubic(seg(p, start, start + 0.16));
         el.style.opacity = String(st);
         el.style.visibility = st > 0.01 ? 'visible' : 'hidden';
         el.style.transform = `translate3d(0, ${(1 - st) * 22}px, 0)`;
@@ -407,7 +511,6 @@ export default function HeroSection({
         targetP = clamp((rawY - wrapper.offsetTop) / scrollSpan, 0, 1);
       }
 
-      // Smooth lerp toward actual scroll position (snaps cleanly at 0 and 1)
       smoothP += (targetP - smoothP) * 0.16;
       if (Math.abs(targetP - smoothP) < 0.0005) smoothP = targetP;
 
@@ -431,25 +534,23 @@ export default function HeroSection({
     if (!wrapperRef.current) return;
     const scrollSpan = wrapperRef.current.offsetHeight - window.innerHeight;
     window.scrollTo({
-      top: wrapperRef.current.offsetTop + scrollSpan * 0.78,
+      top: wrapperRef.current.offsetTop + scrollSpan * 0.94,
       behavior: 'smooth',
     });
   };
 
   const currentBlinkTarget = BLINK_SEQUENCE[blinkStep];
   const currentTaglineWord = TAGLINE_WORDS[taglineIdx];
-
-  // Prepare split characters for Stage 2 headline
   const line1Chars = 'MAKE IT WORK,'.split('');
   const line2Chars = 'THEN MAKE IT WEIRD...'.split('');
   let charCounter = 0;
 
   return (
     <>
-      {/* === PERSISTENT FULLSCREEN WEBGL HALFTONE VIDEO BACKGROUND === */}
+      {/* === PERSISTENT FULLSCREEN SECTION-REACTIVE WEBGL HALFTONE BACKGROUND === */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         <Suspense fallback={null}>
-          <HeroScene />
+          <HeroScene currentSection={currentSection} />
         </Suspense>
       </div>
 
@@ -503,21 +604,21 @@ export default function HeroSection({
 
         <div
           ref={telemetryRef}
-          className="hidden sm:block absolute right-[-96px] bottom-36 rotate-90 origin-center text-[10px] font-mono tracking-[0.14em] text-white/60 uppercase whitespace-nowrap"
+          className="hidden sm:block absolute right-[-84px] bottom-40 rotate-90 origin-center text-[10px] font-mono tracking-[0.14em] text-white/55 uppercase whitespace-nowrap"
         >
           X:0760  Y:0361  P:001%  S:INTRODUCE
         </div>
       </div>
 
-      {/* === PERSISTENT RIGHT PROFILE SIDEBAR (Strictly hidden at scroll=0, docks cleanly) === */}
+      {/* === PERSISTENT RIGHT PROFILE SIDEBAR (3-PHASE MORPH) === */}
       <aside
         ref={sidebarShellRef}
         aria-label="Profile Sidebar"
         style={{ opacity: 0, visibility: 'hidden' }}
-        className="hidden lg:flex fixed top-4 bottom-4 right-4 w-[345px] xl:w-[375px] z-30 border-l border-white/15 bg-[#0D0D0D]/80 backdrop-blur-[3px] flex-col justify-between px-6 py-6 text-[#EAE6DF]"
+        className="hidden lg:flex fixed top-4 bottom-4 right-4 w-[345px] xl:w-[375px] z-30 border-l border-white/15 bg-[#0D0D0D]/82 backdrop-blur-[3px] flex-col justify-between px-6 py-6 text-[#EAE6DF]"
       >
         <div>
-          {/* Crisp Docked Name */}
+          {/* 1. Crisp Docked Name */}
           <div
             ref={targetNameRef}
             style={{ opacity: 0, visibility: 'hidden' }}
@@ -527,7 +628,15 @@ export default function HeroSection({
             <span className="text-[#FF2E17]">KISS</span>
           </div>
 
-          {/* Crisp Docked Subtitle */}
+          <div
+            ref={(el) => {
+              sidebarDetailRefs.current[0] = el;
+            }}
+            style={{ opacity: 0, visibility: 'hidden' }}
+            className="mt-1.5 h-[2px] w-40 bg-[#EAE6DF]/80"
+          />
+
+          {/* 2. Crisp Docked Subtitle */}
           <div
             ref={targetCodeRef}
             style={{ opacity: 0, visibility: 'hidden' }}
@@ -536,67 +645,135 @@ export default function HeroSection({
             CODE / MOTION / {currentTaglineWord}
           </div>
 
-          {/* 5 Circular Social Icons */}
+          {/* 3. Morphing Middle Slot: Phase 0/1 = Bio & Circles | Phase 2 = Text Links & WPKOI / WWWOWS */}
           <div
-            ref={(el) => {
-              sidebarDetailRefs.current[0] = el;
-            }}
-            style={{ opacity: 0, visibility: 'hidden' }}
-            className="mt-4 flex items-center gap-2.5"
-          >
-            {[
-              { label: 'in', href: 'https://www.linkedin.com/in/danielkiss-web-development/' },
-              { label: 'W', href: 'https://profiles.wordpress.org/wpkoithemes/' },
-              { label: 'Bē', href: 'https://www.behance.net/wpkoi' },
-              { label: '◎', href: 'https://dribbble.com' },
-              { label: 'P', href: 'https://pinterest.com' },
-            ].map((soc) => (
-              <a
-                key={soc.label}
-                href={soc.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-7 h-7 rounded-full bg-[#EAE6DF] text-[#0D0D0D] hover:bg-[#FF2E17] hover:text-white transition-colors flex items-center justify-center text-xs font-bold"
-              >
-                {soc.label}
-              </a>
-            ))}
-          </div>
-
-          {/* Bio */}
-          <p
             ref={(el) => {
               sidebarDetailRefs.current[1] = el;
             }}
             style={{ opacity: 0, visibility: 'hidden' }}
-            className="mt-3.5 text-[11px] xl:text-xs text-[#A09D98] leading-relaxed"
+            className="relative mt-4 min-h-[112px]"
           >
-            Frontend Developer | WordPress Developer
-            <br />
-            JavaScript, PHP, WebGL, GSAP, Three.js
-          </p>
+            {/* Phase 0 & 1 Content: Circular Icons + Bio + Location */}
+            <div
+              className={`transition-all duration-500 ${
+                sidebarPhase === 2
+                  ? 'opacity-0 -translate-y-2 pointer-events-none absolute inset-0'
+                  : 'opacity-100 translate-y-0 relative'
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                {[
+                  { label: 'in', href: 'https://www.linkedin.com/in/danielkiss-web-development/' },
+                  { label: 'W', href: 'https://profiles.wordpress.org/wpkoithemes/' },
+                  { label: 'Bē', href: 'https://www.behance.net/wpkoi' },
+                  { label: '◎', href: 'https://dribbble.com' },
+                  { label: 'P', href: 'https://pinterest.com' },
+                ].map((soc) => (
+                  <a
+                    key={soc.label}
+                    href={soc.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-7 h-7 rounded-full bg-[#EAE6DF] text-[#0D0D0D] hover:bg-[#FF2E17] hover:text-white transition-colors flex items-center justify-center text-xs font-bold"
+                  >
+                    {soc.label}
+                  </a>
+                ))}
+              </div>
 
-          {/* Location Meta */}
-          <div
-            ref={(el) => {
-              sidebarDetailRefs.current[2] = el;
-            }}
-            style={{ opacity: 0, visibility: 'hidden' }}
-            className="mt-3 flex items-center gap-3 text-[9px] xl:text-[10px] font-mono tracking-wider uppercase text-[#EAE6DF]/85"
-          >
-            <span className="inline-flex items-center gap-1">
-              <span className="text-[#FF2E17]">●</span> BASED IN HUNGARY
-            </span>
-            <span className="inline-flex items-center gap-1">
-              <span className="text-[#FF2E17]">⊕</span> WORKING WORLDWIDE
-            </span>
+              <p className="mt-3 text-[11px] xl:text-xs text-[#A09D98] leading-relaxed">
+                Frontend Developer | WordPress Developer
+                <br />
+                JavaScript, PHP, WebGL, GSAP, Three.js
+              </p>
+
+              <div className="mt-2.5 flex items-center gap-3 text-[9px] xl:text-[10px] font-mono tracking-wider uppercase text-[#EAE6DF]/85">
+                <span className="inline-flex items-center gap-1">
+                  <span className="text-[#FF2E17]">●</span> BASED IN HUNGARY
+                </span>
+                <span className="inline-flex items-center gap-1">
+                  <span className="text-[#FF2E17]">⊕</span> WORKING WORLDWIDE
+                </span>
+              </div>
+            </div>
+
+            {/* Phase 2 Content (from 02/05 onward): Text Social Links + WPKOI ↗ WWWOWS ↗ */}
+            <div
+              className={`transition-all duration-500 ${
+                sidebarPhase === 2
+                  ? 'opacity-100 translate-y-0 relative'
+                  : 'opacity-0 translate-y-2 pointer-events-none absolute inset-0'
+              }`}
+            >
+              <div className="flex flex-wrap gap-x-3.5 gap-y-1 font-display text-[11px] tracking-[0.12em] uppercase text-[#EAE6DF]">
+                <a
+                  href="https://www.linkedin.com/in/danielkiss-web-development/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-[#FF2E17] transition-colors"
+                >
+                  LINKEDIN ↗
+                </a>
+                <a
+                  href="https://profiles.wordpress.org/wpkoithemes/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-[#FF2E17] transition-colors"
+                >
+                  WORDPRESS ↗
+                </a>
+                <a
+                  href="https://www.behance.net/wpkoi"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-[#FF2E17] transition-colors"
+                >
+                  BEHANCE ↗
+                </a>
+                <a
+                  href="https://dribbble.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-[#FF2E17] transition-colors"
+                >
+                  DRIBBBLE ↗
+                </a>
+                <a
+                  href="https://pinterest.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-[#FF2E17] transition-colors"
+                >
+                  PINTEREST ↗
+                </a>
+              </div>
+
+              <div className="mt-4 flex items-center gap-5 font-display text-xl xl:text-2xl tracking-wide uppercase">
+                <a
+                  href="https://wpkoi.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#FF2E17] hover:brightness-125 transition-all inline-flex items-center gap-1"
+                >
+                  WPKOI <span className="text-base">↗</span>
+                </a>
+                <a
+                  href="https://wwwows.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#EAE6DF] hover:text-[#FF2E17] transition-colors inline-flex items-center gap-1"
+                >
+                  WWWOWS <span className="text-base">↗</span>
+                </a>
+              </div>
+            </div>
           </div>
 
-          {/* 2-Row Compact Navigation Grid */}
+          {/* 4. 2-Row Compact Navigation Grid */}
           <div
             ref={targetNavRef}
             style={{ opacity: 0, visibility: 'hidden' }}
-            className="mt-4 pt-3 border-t border-white/10"
+            className="mt-3 pt-3 border-t border-white/10"
           >
             <nav className="grid grid-cols-3 gap-y-1.5 gap-x-2">
               {navItems.map((item) => {
@@ -631,27 +808,69 @@ export default function HeroSection({
           </div>
         </div>
 
-        {/* Docked Portrait + Email Box */}
+        {/* 5. Bottom Visual Slot (Morphs from PORTRAIT / 01 -> 2x3 WPKoi Grid) + Vertical Badge + Email */}
         <div className="mt-3 flex-1 flex flex-col justify-end gap-3 min-h-0">
-          <div
-            ref={targetPortraitRef}
-            style={{ opacity: 0, visibility: 'hidden' }}
-            className="relative w-full aspect-[4/3.6] max-h-[245px] overflow-hidden bg-[#1A1A1A] border border-white/15"
-          >
-            <span className="absolute top-2.5 left-2.5 z-10 font-mono text-[10px] tracking-[0.15em] uppercase text-[#EAE6DF] bg-black/55 px-1.5 py-0.5">
-              PORTRAIT / 01
-            </span>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/daniel.jpg"
-              onError={(e) => {
-                if (e.currentTarget.src !== FALLBACK_PORTRAIT) {
-                  e.currentTarget.src = FALLBACK_PORTRAIT;
-                }
+          <div className="relative flex items-end gap-2">
+            <div
+              ref={targetPortraitRef}
+              style={{ opacity: 0, visibility: 'hidden' }}
+              className="relative flex-1 aspect-[4/3.6] max-h-[245px] overflow-hidden"
+            >
+              {/* Phase 0: PORTRAIT / 01 */}
+              <div
+                className={`absolute inset-0 bg-[#1A1A1A] border border-white/15 overflow-hidden transition-all duration-500 ${
+                  sidebarPhase >= 1
+                    ? 'opacity-0 scale-95 pointer-events-none'
+                    : 'opacity-100 scale-100'
+                }`}
+              >
+                <span className="absolute top-2.5 left-2.5 z-10 font-mono text-[10px] tracking-[0.15em] uppercase text-[#EAE6DF] bg-black/55 px-1.5 py-0.5">
+                  PORTRAIT / 01
+                </span>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/daniel.jpg"
+                  onError={(e) => {
+                    if (e.currentTarget.src !== FALLBACK_PORTRAIT) {
+                      e.currentTarget.src = FALLBACK_PORTRAIT;
+                    }
+                  }}
+                  alt="Daniel Kiss Portrait"
+                  className="w-full h-full object-cover object-top grayscale contrast-125 brightness-90"
+                />
+              </div>
+
+              {/* Phase 1 & 2: 2x3 WPKoi Mini-Showcase Grid */}
+              <div
+                className={`absolute inset-0 transition-all duration-500 ${
+                  sidebarPhase >= 1
+                    ? 'opacity-100 scale-100'
+                    : 'opacity-0 scale-105 pointer-events-none'
+                }`}
+              >
+                <SidebarWpkoiGrid />
+              </div>
+            </div>
+
+            {/* Vertical Red/White Rotated Edge Badge (14+ YEARS / WEB -> USED WORLDWIDE) */}
+            <div
+              ref={(el) => {
+                sidebarDetailRefs.current[2] = el;
               }}
-              alt="Daniel Kiss Portrait"
-              className="w-full h-full object-cover object-top grayscale contrast-125 brightness-90"
-            />
+              style={{ opacity: 0, visibility: 'hidden' }}
+              className="w-4 flex items-end justify-center pb-1 shrink-0"
+            >
+              <span className="[writing-mode:vertical-rl] font-display text-[11px] tracking-[0.14em] uppercase whitespace-nowrap">
+                {sidebarPhase >= 1 ? (
+                  <span className="text-[#FF2E17]">USED WORLDWIDE</span>
+                ) : (
+                  <>
+                    <span className="text-[#FF2E17]">14+</span>{' '}
+                    <span className="text-[#EAE6DF]">YEARS / WEB</span>
+                  </>
+                )}
+              </span>
+            </div>
           </div>
 
           <a
@@ -668,15 +887,15 @@ export default function HeroSection({
         </div>
       </aside>
 
-      {/* === 280VH LIVE SCROLL MORPH CONTAINER === */}
+      {/* === 240VH LIVE SCROLL MORPH CONTAINER (Unpins smoothly into 02 SKILLS with zero fade gap) === */}
       <div
         id="introduce"
         ref={wrapperRef}
-        className="relative h-[280vh] w-full z-40"
+        className="relative h-[240vh] w-full z-40"
         data-section-name="Introduce"
       >
         <div className="sticky top-0 h-screen w-full overflow-hidden select-none">
-          {/* --- STAGE 1: PAGE 1 ELEMENTS (Walk into Right Sidebar as you scroll) --- */}
+          {/* --- STAGE 1: PAGE 1 ELEMENTS --- */}
           <div className="relative z-30 h-full flex flex-col justify-between px-7 sm:px-11 py-7 sm:py-9 pointer-events-none">
             <header className="flex items-start justify-between gap-4">
               <div>
@@ -873,7 +1092,7 @@ export default function HeroSection({
             </div>
           </div>
 
-          {/* --- STAGE 2: PAGE 2 LEFT CONTENT (Strictly hidden at scroll=0, assembles as Stage 1 walks) --- */}
+          {/* --- STAGE 2: PAGE 2 LEFT CONTENT (Stays solid to scroll directly into 02 SKILLS) --- */}
           <div
             ref={stage2ContainerRef}
             style={{ opacity: 0, visibility: 'hidden' }}
