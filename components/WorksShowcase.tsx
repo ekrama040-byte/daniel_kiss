@@ -5,9 +5,9 @@ import { useEffect, useRef, useState } from 'react';
 const wpkoiShowcaseSlides = [
   { num: '01', videoSrc: '/showcase-01.mp4', variant: 'trending' as const },
   { num: '02', videoSrc: '/showcase-02.mp4', variant: 'catalog' as const },
-  { num: '03', videoSrc: '/showcase-03.mp4', variant: 'toolkit' as const },
-  { num: '04', videoSrc: '/showcase-04.mp4', variant: 'color' as const },
-  { num: '05', videoSrc: '/showcase-05.mp4', variant: 'dark' as const },
+  { num: '03', videoSrc: '/showcase-01.mp4', variant: 'toolkit' as const },
+  { num: '04', videoSrc: '/showcase-01.mp4', variant: 'color' as const },
+  { num: '05', videoSrc: '/showcase-02.mp4', variant: 'dark' as const },
 ];
 
 const experienceItems = [
