@@ -10,7 +10,6 @@ interface CollageTile {
   fg: string;
   accent: string;
   image?: string;
-  // Starting scattered offsets before snapping into the full-bleed grid
   fromX: number;
   fromY: number;
   fromRot: number;
@@ -263,7 +262,7 @@ export default function ContactSection({
     };
   }, []);
 
-  // 60fps scroll choreography: Intro reveal -> Sidebar dismissal -> Poster wall snap -> BUG ME finale
+  // 60fps scroll choreography: Intro reveal -> Upward sidebar dismissal -> Poster wall snap -> BUG ME finale
   useEffect(() => {
     let smoothIntro = 0;
     let smoothDismiss = 0;
@@ -275,15 +274,17 @@ export default function ContactSection({
       const introEl = introZoneRef.current;
       const finaleEl = finaleZoneRef.current;
 
-      // 1. Intro headline progress ("SO... WOULD YOU MAKE SOMETHING WEIRD TOGETHER?")
+      // 1. Intro headline progress + staggered upward sidebar dismissal
       if (introEl) {
         const rect = introEl.getBoundingClientRect();
         const rawIntro = clamp((vh * 0.92 - rect.top) / (vh * 0.52), 0, 1);
         smoothIntro += (rawIntro - smoothIntro) * 0.16;
 
-        // Dismiss the docked right sidebar as the intro scrolls from mid-screen off the top
-        const rawDismiss = clamp((vh * 0.42 - rect.top) / (vh * 0.65), 0, 1);
-        smoothDismiss += (rawDismiss - smoothDismiss) * 0.14;
+        // Reaches 1.0 well before the full-width poster wall locks at top: 0
+        const rawDismiss = clamp((vh * 0.5 - rect.top) / (vh * 0.6), 0, 1);
+        smoothDismiss += (rawDismiss - smoothDismiss) * 0.16;
+        if (Math.abs(rawDismiss - smoothDismiss) < 0.0004) smoothDismiss = rawDismiss;
+
         if (sidebarDismissRef) {
           sidebarDismissRef.current = smoothDismiss;
         }
@@ -306,7 +307,6 @@ export default function ContactSection({
       if (finaleEl) {
         const rect = finaleEl.getBoundingClientRect();
         const span = Math.max(finaleEl.offsetHeight - vh, 1);
-        // Start flying cards in slightly before the sticky box locks at top
         const rawFinale = clamp((vh * 0.45 - rect.top) / (span + vh * 0.45), 0, 1);
         smoothFinale += (rawFinale - smoothFinale) * 0.14;
         if (Math.abs(rawFinale - smoothFinale) < 0.0004) smoothFinale = rawFinale;
@@ -407,7 +407,6 @@ export default function ContactSection({
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Reset char ref arrays cleanly per render
   introCharRefs.current = [];
   bugCharRefs.current = [];
   let introIdx = 0;
@@ -426,7 +425,7 @@ export default function ContactSection({
     >
       {/* ===================================================================== */}
       {/* PART 1: "SO... WOULD YOU MAKE SOMETHING WEIRD TOGETHER?"              */}
-      {/* Aligns with the left stage while smoothly dismissing the right sidebar */}
+      {/* Right-padded while the docked sidebar peels upward off-screen         */}
       {/* ===================================================================== */}
       <div
         ref={introZoneRef}
@@ -509,7 +508,7 @@ export default function ContactSection({
                 <div className="w-full h-full p-2.5 sm:p-3 flex flex-col justify-between pointer-events-none">
                   <div className="flex items-center justify-between text-[6px] sm:text-[7px] font-mono uppercase tracking-widest opacity-65">
                     <span>WPKOI</span>
-                    <span>{tile.sub}</span>
+                    <span className="truncate ml-1">{tile.sub}</span>
                   </div>
 
                   {tile.image ? (
@@ -537,7 +536,7 @@ export default function ContactSection({
             ))}
           </div>
 
-          {/* Radial Center Vignette so BUG ME WITH YOUR IDEA pops cleanly (pointer-events-none so outer tiles stay draggable) */}
+          {/* Radial Center Vignette so BUG ME WITH YOUR IDEA pops cleanly */}
           <div
             aria-hidden="true"
             className="pointer-events-none absolute inset-0 z-20"
@@ -622,7 +621,7 @@ export default function ContactSection({
               </span>
             </h3>
 
-            {/* Interactive Click-to-Copy Email Button (Hover Red Border -> Click Solid Red "COPIED") */}
+            {/* Interactive Click-to-Copy Email Button */}
             <div
               ref={emailWrapRef}
               style={{ opacity: 0 }}
@@ -646,7 +645,7 @@ export default function ContactSection({
             </div>
           </div>
 
-          {/* Bottom Corners: Handwritten DRAG ME ↗ (Left) & SCROLL TO TOP (Right) */}
+          {/* Bottom Corners: DRAG ME ↗ (Left) & SCROLL TO TOP (Right) */}
           <div
             ref={bottomCuesRef}
             style={{ opacity: 0 }}

@@ -256,7 +256,7 @@ function ThemeCardArtwork({ variant }: { variant: ThemeCard['variant'] }) {
           <div className="grid grid-cols-2 gap-1.5 flex-1 my-1.5">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=240&q=75"
+              src="/1-300.webp"
               alt="Ekamrika left"
               className="w-full h-full object-cover grayscale contrast-125"
             />
