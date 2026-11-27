@@ -947,11 +947,11 @@ export default function HeroSection({
               </div>
             </header>
 
-            {/* Bottom Hero Block — right-padded away from the vertical telemetry strip */}
-            <div className="mt-auto pt-8 lg:pr-20 xl:pr-24">
+            {/* Bottom Hero Block — w-fit locks KISS + Portrait + Tagline + Links together with clean right clearance */}
+            <div className="mt-auto pt-8 w-full lg:w-fit max-w-full lg:pl-2">
               <div
                 ref={stage1MisbehaveRef}
-                className="flex justify-end lg:pr-[16%] mb-1.5 sm:mb-2"
+                className="flex justify-end lg:pr-[7%] mb-1.5 sm:mb-2"
               >
                 <p className="font-marker text-[#EAE6DF] text-sm sm:text-lg md:text-xl tracking-wide -rotate-1 flex items-center gap-2">
                   <span className="text-lg sm:text-2xl">↙</span>
@@ -965,13 +965,13 @@ export default function HeroSection({
                 </p>
               </div>
 
-              {/* Tight Title + Vertical Portrait Row matching original alignment */}
-              <div className="flex flex-col lg:flex-row items-start lg:items-end justify-between gap-4 lg:gap-6">
+              {/* Tight Title + Vertical Portrait Row matching original spacing */}
+              <div className="flex flex-col lg:flex-row items-start lg:items-end justify-start gap-4 lg:gap-6 xl:gap-7">
                 <div ref={nameOriginRef} className="w-fit shrink-0">
                   <h1
                     ref={flyingNameRef}
                     style={{ transformOrigin: '0 0' }}
-                    className="font-display uppercase text-[20vw] sm:text-[18vw] lg:text-[16.2vw] xl:text-[15.6vw] leading-[0.80] tracking-[-0.025em] inline-flex flex-nowrap items-baseline gap-x-4 sm:gap-x-6 w-fit will-change-transform"
+                    className="font-display uppercase text-[20vw] sm:text-[18vw] lg:text-[17.6vw] xl:text-[17vw] leading-[0.80] tracking-[0.005em] inline-flex flex-nowrap items-baseline gap-x-4 sm:gap-x-6 lg:gap-x-10 xl:gap-x-12 w-fit will-change-transform"
                   >
                     <span className="text-[#EAE6DF] drop-shadow-[0_0_24px_rgba(234,230,223,0.28)]">
                       DANIEL
@@ -984,12 +984,12 @@ export default function HeroSection({
 
                 <div
                   ref={portraitOriginRef}
-                  className="hidden lg:block shrink-0 w-[11.8vw] min-w-[145px] max-w-[180px]"
+                  className="hidden lg:block shrink-0 w-[11.4vw] min-w-[138px] max-w-[174px]"
                 >
                   <div
                     ref={flyingPortraitRef}
                     style={{ transformOrigin: '0 0' }}
-                    className="relative w-full aspect-[4/4.8] overflow-hidden bg-[#1A1A1A] will-change-transform"
+                    className="relative w-full aspect-[4/5] overflow-hidden bg-[#1A1A1A] will-change-transform"
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
@@ -1008,7 +1008,7 @@ export default function HeroSection({
 
               <div
                 ref={stage1BottomBarRef}
-                className="pointer-events-auto mt-4 sm:mt-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+                className="pointer-events-auto mt-4 sm:mt-5 w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 lg:pr-2"
               >
                 <a
                   href="#skills"
