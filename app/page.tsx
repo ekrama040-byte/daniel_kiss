@@ -21,8 +21,6 @@ export default function Home() {
   const [showLoader, setShowLoader] = useState(true);
   const [currentSection, setCurrentSection] = useState('INTRODUCE');
   const [sidebarPhase, setSidebarPhase] = useState<0 | 1 | 2>(0);
-
-  // Shared 0 -> 1 ref so ContactSection dismisses HeroSection's right sidebar at 60fps
   const sidebarDismissRef = useRef(0);
 
   useEffect(() => {
@@ -56,19 +54,17 @@ export default function Home() {
 
       <HeroSection
         currentSection={currentSection}
-        // sidebarPhase={0}
+        sidebarPhase={sidebarPhase}
         sidebarDismissRef={sidebarDismissRef}
       />
 
       <main className="relative bg-transparent text-[#EAE6DF] overflow-x-clip">
-        {/* Left-stage sections paired with the docked Right Profile Sidebar */}
         <div className="main-content relative z-20 lg:pr-[375px] xl:pr-[405px]">
           <SkillsSection />
           <WorksSection onSidebarPhaseChange={setSidebarPhase} />
           <AwardsSection />
         </div>
 
-        {/* Full-width 05 CONTACT: dismisses sidebar -> draggable poster wall -> BUG ME WITH YOUR IDEA */}
         <ContactSection sidebarDismissRef={sidebarDismissRef} />
       </main>
     </>
