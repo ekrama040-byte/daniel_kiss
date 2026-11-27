@@ -1,205 +1,35 @@
 'use client';
 
 import { useEffect, useRef, useState, type MutableRefObject } from 'react';
+import { CARD_IMAGES } from '@/lib/cards';
 
-interface CollageTile {
-  id: string;
-  title: string;
-  sub: string;
-  bg: string;
-  fg: string;
-  accent: string;
-  image?: string;
-  fromX: number;
-  fromY: number;
-  fromRot: number;
-}
-
-const COLLAGE_TILES: CollageTile[] = [
-  {
-    id: 't1',
-    title: 'STEP INTO',
-    sub: 'OUR SHOW · 01',
-    bg: '#23352D',
-    fg: '#E6E2D8',
-    accent: '#D8BE3A',
-    fromX: -260,
-    fromY: -180,
-    fromRot: -18,
-  },
-  {
-    id: 't2',
-    title: 'APPROACH',
-    sub: 'CREATIVE STUDIO',
-    bg: '#191919',
-    fg: '#EAE6DF',
-    accent: '#C8281D',
-    fromX: -120,
-    fromY: -220,
-    fromRot: 12,
-  },
-  {
-    id: 't3',
-    title: 'PROGRESS',
-    sub: 'BLOCK PATTERNS',
-    bg: '#D5D1C8',
-    fg: '#141414',
-    accent: '#141414',
-    fromX: 40,
-    fromY: -240,
-    fromRot: -10,
-  },
-  {
-    id: 't4',
-    title: 'MOMENTUM',
-    sub: '51 DESIGNS',
-    bg: '#C9C2B2',
-    fg: '#141414',
-    accent: '#D8BE3A',
-    fromX: 160,
-    fromY: -210,
-    fromRot: 15,
-  },
-  {
-    id: 't5',
-    title: 'GREAT SOLUTIONS',
-    sub: 'KRIPA / 08',
-    bg: '#DFDDD6',
-    fg: '#141414',
-    accent: '#C8281D',
-    fromX: 290,
-    fromY: -170,
-    fromRot: 20,
-  },
-  {
-    id: 't6',
-    title: 'MOTIVATION',
-    sub: 'TRIPTI / 06',
-    bg: '#ECEAE4',
-    fg: '#111111',
-    accent: '#141414',
-    image:
-      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=360&q=75',
-    fromX: -320,
-    fromY: -40,
-    fromRot: -16,
-  },
-  {
-    id: 't7',
-    title: 'INSPIRATION',
-    sub: 'PLUTA / 04',
-    bg: '#DFDDD6',
-    fg: '#141414',
-    accent: '#141414',
-    image:
-      'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=320&q=75',
-    fromX: -170,
-    fromY: -90,
-    fromRot: 14,
-  },
-  {
-    id: 't8',
-    title: 'NEXUS',
-    sub: 'HRASVA / 02',
-    bg: '#D5D1C8',
-    fg: '#C8281D',
-    accent: '#C8281D',
-    image:
-      'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=360&q=75',
-    fromX: -40,
-    fromY: -140,
-    fromRot: -9,
-  },
-  {
-    id: 't9',
-    title: 'NEW BRAND',
-    sub: 'EKANTIKA / 09',
-    bg: '#161616',
-    fg: '#EAE6DF',
-    accent: '#FF2E17',
-    image:
-      'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=320&q=75',
-    fromX: 190,
-    fromY: -100,
-    fromRot: 13,
-  },
-  {
-    id: 't10',
-    title: "LET'S HAVE SOME FUN!",
-    sub: 'GUTENBERG READY',
-    bg: '#E6E4DE',
-    fg: '#141414',
-    accent: '#141414',
-    image:
-      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=320&q=75',
-    fromX: 330,
-    fromY: -30,
-    fromRot: 19,
-  },
-  {
-    id: 't11',
-    title: 'MAKE NOISE',
-    sub: 'PRAKATA / 05',
-    bg: '#C9C2B2',
-    fg: '#A6241B',
-    accent: '#A6241B',
-    image:
-      'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=360&q=75',
-    fromX: -310,
-    fromY: 160,
-    fromRot: -21,
-  },
-  {
-    id: 't12',
-    title: 'DIGITAL PARADISE',
-    sub: 'GAMANA / 10',
-    bg: '#DFB6C4',
-    fg: '#141414',
-    accent: '#141414',
-    image:
-      'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=300&q=75',
-    fromX: -140,
-    fromY: 190,
-    fromRot: 11,
-  },
-  {
-    id: 't13',
-    title: 'ELECTRO',
-    sub: 'KALPITA / 01',
-    bg: '#D9D6CE',
-    fg: '#A51D24',
-    accent: '#A51D24',
-    image:
-      'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=340&q=75',
-    fromX: 20,
-    fromY: 220,
-    fromRot: -14,
-  },
-  {
-    id: 't14',
-    title: 'EUPHORIA',
-    sub: 'SUGUPTA / 07',
-    bg: '#D8BE3A',
-    fg: '#151515',
-    accent: '#388C6B',
-    image:
-      'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=320&q=75',
-    fromX: 210,
-    fromY: 170,
-    fromRot: -15,
-  },
-  {
-    id: 't15',
-    title: 'PERFECTION',
-    sub: 'WPKOI COLLECTION',
-    bg: '#C8281D',
-    fg: '#F5EFE6',
-    accent: '#141414',
-    fromX: 320,
-    fromY: 180,
-    fromRot: 18,
-  },
+const TILE_OFFSETS = [
+  { fromX: -260, fromY: -180, fromRot: -18 },
+  { fromX: -120, fromY: -220, fromRot: 12 },
+  { fromX: 40, fromY: -240, fromRot: -10 },
+  { fromX: 160, fromY: -210, fromRot: 15 },
+  { fromX: 290, fromY: -170, fromRot: 20 },
+  { fromX: -320, fromY: -40, fromRot: -16 },
+  { fromX: -170, fromY: -90, fromRot: 14 },
+  { fromX: -40, fromY: -140, fromRot: -9 },
+  { fromX: 190, fromY: -100, fromRot: 13 },
+  { fromX: 330, fromY: -30, fromRot: 19 },
+  { fromX: -310, fromY: 160, fromRot: -21 },
+  { fromX: -140, fromY: 190, fromRot: 11 },
+  { fromX: 20, fromY: 220, fromRot: -14 },
+  { fromX: 210, fromY: 170, fromRot: -15 },
+  { fromX: 320, fromY: 180, fromRot: 18 },
 ];
+
+// Cycles your real cards from lib/cards.ts across all 15 (5x3) poster wall slots
+const COLLAGE_TILES =
+  CARD_IMAGES.length > 0
+    ? TILE_OFFSETS.map((offset, idx) => ({
+        id: `t${idx + 1}`,
+        ...offset,
+        ...CARD_IMAGES[idx % CARD_IMAGES.length],
+      }))
+    : [];
 
 const CHAR_TILTS = [-14, 10, -8, 12, -11, 7, -13, 9, -7, 13, -6, 8, -12, 7, -9, 11];
 const EMAIL_ADDRESS = 'info@danielkiss.hu';
@@ -489,7 +319,7 @@ export default function ContactSection({
       {/* ===================================================================== */}
       <div ref={finaleZoneRef} className="relative h-[220vh] w-full">
         <div className="sticky top-0 h-screen w-full overflow-hidden">
-          {/* Draggable 5x3 Full-Bleed Poster Wall */}
+          {/* Draggable 5x3 Full-Bleed Real Card Poster Wall */}
           <div className="absolute inset-0 z-10 p-4 sm:p-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 grid-rows-3 gap-3 sm:gap-4">
             {COLLAGE_TILES.map((tile, idx) => (
               <div
@@ -498,40 +328,16 @@ export default function ContactSection({
                   tileRefs.current[idx] = el;
                 }}
                 onPointerDown={(e) => handleTilePointerDown(idx, e)}
-                style={{
-                  backgroundColor: tile.bg,
-                  color: tile.fg,
-                  opacity: 0,
-                }}
-                className="group relative w-full h-full overflow-hidden border border-white/15 shadow-[0_18px_40px_rgba(0,0,0,0.65)] cursor-grab active:cursor-grabbing touch-none will-change-transform select-none"
+                style={{ opacity: 0 }}
+                className="group relative w-full h-full overflow-hidden bg-[#141414] border border-white/15 shadow-[0_18px_40px_rgba(0,0,0,0.65)] cursor-grab active:cursor-grabbing touch-none will-change-transform select-none"
               >
-                <div className="w-full h-full p-2.5 sm:p-3 flex flex-col justify-between pointer-events-none">
-                  <div className="flex items-center justify-between text-[6px] sm:text-[7px] font-mono uppercase tracking-widest opacity-65">
-                    <span>WPKOI</span>
-                    <span className="truncate ml-1">{tile.sub}</span>
-                  </div>
-
-                  {tile.image ? (
-                    <div className="relative flex-1 my-1.5 overflow-hidden border border-black/20">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={tile.image}
-                        alt={tile.title}
-                        draggable={false}
-                        className="w-full h-full object-cover object-top grayscale-[25%] contrast-115"
-                      />
-                    </div>
-                  ) : (
-                    <div
-                      style={{ backgroundColor: tile.accent }}
-                      className="flex-1 my-1.5 opacity-80 border border-black/15"
-                    />
-                  )}
-
-                  <div className="font-display uppercase text-lg sm:text-2xl leading-[0.86] tracking-tight truncate">
-                    {tile.title}
-                  </div>
-                </div>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={tile.src}
+                  alt={tile.alt}
+                  draggable={false}
+                  className="w-full h-full object-cover pointer-events-none select-none"
+                />
               </div>
             ))}
           </div>

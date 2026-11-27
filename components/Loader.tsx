@@ -1,68 +1,29 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { CARD_IMAGES } from '@/lib/cards';
 
 const TARGET_NAME = 'DANIEL KISS';
 const SCRAMBLE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 const RULER_TICKS = Array.from({ length: 73 });
 
-const STACK_CARDS = [
-  {
-    threshold: 6,
-    rotate: -11,
-    dx: 0,
-    dy: 0,
-    bg: '#FF2E17',
-    text: '#141414',
-    title: 'ELECTRO',
-    sub: 'PORTFOLIO / 01',
-    accent: '#EAE6DF',
-  },
-  {
-    threshold: 28,
-    rotate: 7,
-    dx: -4,
-    dy: 2,
-    bg: '#E8E4DC',
-    text: '#141414',
-    title: 'INSPIRATION',
-    sub: 'SCROLL FOR MORE',
-    accent: '#D8BE3A',
-  },
-  {
-    threshold: 52,
-    rotate: -6,
-    dx: 3,
-    dy: -2,
-    bg: '#D8BE3A',
-    text: '#151515',
-    title: 'EUPHORIA',
-    sub: 'STEP INTO',
-    accent: '#388C6B',
-  },
-  {
-    threshold: 74,
-    rotate: 5,
-    dx: -2,
-    dy: 1,
-    bg: '#C9C2B2',
-    text: '#141414',
-    title: 'NOISE',
-    sub: 'PRAKATA / 05',
-    accent: '#A6241B',
-  },
-  {
-    threshold: 92,
-    rotate: -2,
-    dx: 0,
-    dy: 0,
-    bg: '#ECEAE4',
-    text: '#141414',
-    title: "LET'S HAVE FUN!",
-    sub: 'GREAT SOLUTIONS',
-    accent: '#FF2E17',
-  },
+const STACK_POSES = [
+  { threshold: 6, rotate: -11, dx: 0, dy: 0 },
+  { threshold: 20, rotate: 8, dx: -4, dy: 2 },
+  { threshold: 34, rotate: -7, dx: 3, dy: -2 },
+  { threshold: 48, rotate: 6, dx: -3, dy: 1 },
+  { threshold: 62, rotate: -5, dx: 2, dy: -1 },
+  { threshold: 76, rotate: 4, dx: -2, dy: 1 },
+  { threshold: 90, rotate: -2, dx: 0, dy: 0 },
 ];
+
+const STACK_CARDS =
+  CARD_IMAGES.length > 0
+    ? STACK_POSES.map((pose, idx) => ({
+        ...pose,
+        ...CARD_IMAGES[idx % CARD_IMAGES.length],
+      }))
+    : [];
 
 function scrambleName(progress: number): string {
   // Decode progressively from 12% to 88%
@@ -93,14 +54,13 @@ export default function Loader({ onComplete }: { onComplete: () => void }) {
     let rafId = 0;
     let lastScrambleAt = 0;
     const startTime = performance.now();
-    const duration = 2200; // Crisp 2.2s run regardless of network speed
+    const duration = 2200;
 
     const timers: number[] = [];
 
     const tick = (now: number) => {
       const elapsed = now - startTime;
       const rawT = Math.min(1, elapsed / duration);
-      // Slight ease-out with authentic stepped feel
       const eased = 1 - Math.pow(1 - rawT, 2.2);
       const nextVal = Math.min(100, Math.round(eased * 100));
 
@@ -150,7 +110,7 @@ export default function Loader({ onComplete }: { onComplete: () => void }) {
       }}
       className="fixed inset-0 z-[100] bg-[#121212] text-[#EAE6DF] flex flex-col justify-between p-6 sm:p-9 select-none will-change-transform"
     >
-      {/* === TOP BAR: Red Square + Scrambling Name (Left) & Stacking Card Deck (Right) === */}
+      {/* === TOP BAR: Red Square + Scrambling Name (Left) & Stacking Real Card Deck (Right) === */}
       <div
         style={{
           opacity: innerHidden ? 0 : 1,
@@ -165,16 +125,14 @@ export default function Loader({ onComplete }: { onComplete: () => void }) {
           </span>
         </div>
 
-        {/* Stacking Tilted Mini Theme Cards */}
-        <div className="relative w-[132px] sm:w-[156px] h-[156px] sm:h-[184px] mr-1 sm:mr-3">
+        {/* Stacking Tilted Real Card Deck */}
+        <div className="relative w-[138px] sm:w-[164px] h-[148px] sm:h-[176px] mr-1 sm:mr-3">
           {STACK_CARDS.map((card, idx) => {
             const visible = progress >= card.threshold;
             return (
               <div
-                key={card.title}
+                key={`${card.src}-${idx}`}
                 style={{
-                  backgroundColor: card.bg,
-                  color: card.text,
                   opacity: visible ? 1 : 0,
                   transform: visible
                     ? `translate3d(${card.dx}px, ${card.dy}px, 0) rotate(${card.rotate}deg) scale(1)`
@@ -183,26 +141,17 @@ export default function Loader({ onComplete }: { onComplete: () => void }) {
                     'transform 340ms cubic-bezier(0.22, 1, 0.36, 1), opacity 200ms ease',
                   zIndex: idx + 1,
                 }}
-                className="absolute inset-0 p-2.5 sm:p-3 flex flex-col justify-between border border-black/25 shadow-[0_14px_30px_rgba(0,0,0,0.55)] overflow-hidden"
+                className="absolute inset-0 bg-[#1A1A1A] border border-white/15 shadow-[0_14px_30px_rgba(0,0,0,0.65)] overflow-hidden will-change-transform"
               >
-                <div className="flex items-center justify-between text-[6px] font-mono uppercase tracking-wider opacity-70">
-                  <span>WPKOI</span>
-                  <span>0{idx + 1}</span>
-                </div>
-
-                <div className="my-auto">
-                  <div className="font-display uppercase text-xl sm:text-2xl leading-[0.86] tracking-tight">
-                    {card.title}
-                  </div>
-                  <div
-                    style={{ backgroundColor: card.accent }}
-                    className="mt-2 h-10 sm:h-12 w-full opacity-90 border border-black/15"
-                  />
-                </div>
-
-                <div className="font-mono text-[6px] uppercase tracking-widest opacity-80 truncate">
-                  {card.sub}
-                </div>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={card.src}
+                  alt={card.alt}
+                  loading="eager"
+                  decoding="sync"
+                  draggable={false}
+                  className="w-full h-full object-cover"
+                />
               </div>
             );
           })}
