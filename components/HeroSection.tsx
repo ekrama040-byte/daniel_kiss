@@ -530,9 +530,9 @@ export default function HeroSection({
         ref={sidebarShellRef}
         aria-label="Profile Sidebar"
         style={{ opacity: 0, visibility: 'hidden' }}
-        className="hidden lg:flex fixed top-4 bottom-4 right-5 w-[335px] xl:w-[365px] z-30 flex-col justify-between px-5 py-6 text-[#EAE6DF]"
+        className="hidden lg:flex fixed top-4 bottom-4 right-5 w-[335px] xl:w-[365px] z-30 flex-col justify-between gap-2.5 px-5 py-4 xl:py-5 text-[#EAE6DF]"
       >
-        <div>
+        <div className="shrink-0 relative z-10">
           {/* EXIT BLOCK 0: Name + Brush Underline + Tagline */}
           <div
             ref={(el) => {
@@ -543,7 +543,7 @@ export default function HeroSection({
             <div
               ref={targetNameRef}
               style={{ opacity: 0, visibility: 'hidden' }}
-              className="w-fit font-display text-[44px] xl:text-[48px] leading-[0.86] tracking-tight uppercase"
+              className="w-fit font-display text-[38px] xl:text-[46px] leading-[0.86] tracking-tight uppercase"
             >
               <span className="text-[#EAE6DF]">DANIEL </span>
               <span className="text-[#FF2E17]">KISS</span>
@@ -554,7 +554,7 @@ export default function HeroSection({
                 sidebarDetailRefs.current[0] = el;
               }}
               style={{ opacity: 0, visibility: 'hidden' }}
-              className="mt-1.5 w-44"
+              className="mt-1 w-44"
             >
               <svg
                 viewBox="0 0 180 8"
@@ -575,7 +575,7 @@ export default function HeroSection({
             <div
               ref={targetCodeRef}
               style={{ opacity: 0, visibility: 'hidden' }}
-              className="mt-2 w-fit font-display text-sm xl:text-base tracking-wider uppercase text-[#EAE6DF]"
+              className="mt-1.5 w-fit font-display text-sm xl:text-base tracking-wider uppercase text-[#EAE6DF]"
             >
               CODE / MOTION / {currentTaglineWord}
             </div>
@@ -593,7 +593,7 @@ export default function HeroSection({
                 sidebarDetailRefs.current[1] = el;
               }}
               style={{ opacity: 0, visibility: 'hidden' }}
-              className="relative mt-4 min-h-[108px]"
+              className="relative mt-2.5 xl:mt-3.5 min-h-[86px] xl:min-h-[102px]"
             >
               {/* Phase 0 & 1: Circular Social Icons + Bio + Location */}
               <div
@@ -603,7 +603,7 @@ export default function HeroSection({
                     : 'opacity-100 translate-y-0 relative'
                 }`}
               >
-                <div className="flex items-center gap-2.5">
+                <div className="flex items-center gap-2">
                   {[
                     { label: 'in', href: 'https://www.linkedin.com/in/danielkiss-web-development/' },
                     { label: 'W', href: 'https://profiles.wordpress.org/wpkoithemes/' },
@@ -616,20 +616,20 @@ export default function HeroSection({
                       href={soc.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-7 h-7 rounded-full bg-[#EAE6DF] text-[#0D0D0D] hover:bg-[#FF2E17] hover:text-white transition-colors flex items-center justify-center text-xs font-bold"
+                      className="w-6 h-6 xl:w-7 xl:h-7 rounded-full bg-[#EAE6DF] text-[#0D0D0D] hover:bg-[#FF2E17] hover:text-white transition-colors flex items-center justify-center text-[11px] xl:text-xs font-bold"
                     >
                       {soc.label}
                     </a>
                   ))}
                 </div>
 
-                <p className="mt-3 text-[11px] xl:text-xs text-[#A09D98] leading-relaxed">
+                <p className="mt-2 text-[11px] xl:text-xs text-[#A09D98] leading-snug">
                   Frontend Developer | WordPress Developer
                   <br />
                   JavaScript, PHP, WebGL, GSAP, Three.js
                 </p>
 
-                <div className="mt-2.5 flex items-center gap-3 text-[9px] xl:text-[10px] font-mono tracking-wider uppercase text-[#EAE6DF]/85">
+                <div className="mt-2 flex items-center gap-3 text-[9px] xl:text-[10px] font-mono tracking-wider uppercase text-[#EAE6DF]/85">
                   <span className="inline-flex items-center gap-1">
                     <span className="text-[#FF2E17]">●</span> BASED IN HUNGARY
                   </span>
@@ -690,7 +690,7 @@ export default function HeroSection({
                   </a>
                 </div>
 
-                <div className="mt-4 flex items-center gap-5 font-display text-xl xl:text-2xl tracking-wide uppercase">
+                <div className="mt-3 flex items-center gap-5 font-display text-xl xl:text-2xl tracking-wide uppercase">
                   <a
                     href="https://wpkoi.com/"
                     target="_blank"
@@ -712,7 +712,7 @@ export default function HeroSection({
             </div>
           </div>
 
-          {/* EXIT BLOCK 2: 2-Row Compact Navigation Grid */}
+          {/* EXIT BLOCK 2: 2-Row Compact Navigation Grid (both rows always stay unobstructed) */}
           <div
             ref={(el) => {
               sidebarExitBlockRefs.current[2] = el;
@@ -722,9 +722,9 @@ export default function HeroSection({
             <div
               ref={targetNavRef}
               style={{ opacity: 0, visibility: 'hidden' }}
-              className="mt-3 pt-3"
+              className="mt-2 pt-2 border-t border-white/10"
             >
-              <nav className="grid grid-cols-3 gap-y-1.5 gap-x-2">
+              <nav className="grid grid-cols-3 gap-y-1 gap-x-2">
                 {navItems.map((item) => {
                   const isCurrent = activeNav === item.label;
                   return (
@@ -758,18 +758,18 @@ export default function HeroSection({
           </div>
         </div>
 
-        {/* EXIT BLOCK 3: Bottom Visual Slot (/daniel.jpg -> upward wipe -> /side-1.jpg) + Edge Badge + Email */}
+        {/* EXIT BLOCK 3: Bottom Visual Slot — flex-1 min-h-0 keeps portrait/showcase clear of the nav */}
         <div
           ref={(el) => {
             sidebarExitBlockRefs.current[3] = el;
           }}
-          className="mt-3 flex-1 flex flex-col justify-end gap-3 min-h-0 will-change-transform"
+          className="flex-1 min-h-0 flex flex-col justify-end gap-2.5 will-change-transform"
         >
-          <div className="relative flex items-end gap-2">
+          <div className="relative flex-1 min-h-0 flex items-end gap-2">
             <div
               ref={targetPortraitRef}
               style={{ opacity: 0, visibility: 'hidden' }}
-              className="relative flex-1 aspect-[4/4.2] max-h-[255px] overflow-hidden bg-[#141414]"
+              className="relative flex-1 h-full max-h-[245px] overflow-hidden bg-[#141414]"
             >
               {/* Phase 0: PORTRAIT / 01 (/daniel.jpg) — slides UP and fades out when Phase >= 1 */}
               <div
@@ -821,7 +821,7 @@ export default function HeroSection({
                 sidebarDetailRefs.current[2] = el;
               }}
               style={{ opacity: 0, visibility: 'hidden' }}
-              className="relative w-4 h-[130px] flex items-end justify-center pb-1 shrink-0 overflow-hidden"
+              className="relative w-4 h-full max-h-[130px] flex items-end justify-center pb-1 shrink-0 overflow-hidden"
             >
               <span
                 className={`absolute bottom-1 [writing-mode:vertical-rl] font-display text-[11px] tracking-[0.14em] uppercase whitespace-nowrap transition-all duration-500 ease-out ${
@@ -851,7 +851,7 @@ export default function HeroSection({
             }}
             href="mailto:info@danielkiss.hu"
             style={{ opacity: 0, visibility: 'hidden' }}
-            className="flex items-center justify-between border border-white/25 px-3.5 py-2.5 text-xs font-mono text-[#EAE6DF] hover:border-[#FF2E17] transition-colors"
+            className="shrink-0 flex items-center justify-between border border-white/25 px-3.5 py-2 text-xs font-mono text-[#EAE6DF] hover:border-[#FF2E17] transition-colors"
           >
             <span>info@danielkiss.hu</span>
             <span className="text-[#FF2E17] text-sm">✉</span>
